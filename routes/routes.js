@@ -2,6 +2,7 @@ import express from 'express';
 import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
 import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
 import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
+import { checkEnglishWord } from '../src/controllers/englishWordsController.js';
 
 export const router = express.Router()
  
@@ -71,5 +72,20 @@ router.get('/getPuzzles', async (req, res) => {
     catch(e) {
         console.log(e);
         res.status(500).send("Error retrieving puzzles")
+    }
+})
+
+router.get('/checkValidEnglishWord', async (req, res) => {
+    try {
+        let valid = await checkEnglishWord(req.query.word)
+        if(valid) {
+            res.status(200).send(true);
+        } else {
+            res.status(200).send(false);
+        }
+    }
+    catch(e) {
+        console.log(e);
+        res.status(500).send("Error checking word validity")
     }
 })
