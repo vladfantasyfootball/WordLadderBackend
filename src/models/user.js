@@ -5,6 +5,14 @@ export const WordLadderUsersSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    ad: {
+        type: Object,
+        required: true,
+        default: {
+            adWatched: false,
+            dateWatched: null
+        }
+    },
     wordLadder: {
         type: Object,
         required: true,
