@@ -1,9 +1,10 @@
 import { WordLadderUsersModel } from "../models/user.js";
 import dotenv from 'dotenv'
 dotenv.config();
-const dateConst = process.env.DATE_CONST;
-
+// const dateConst = process.env.DATE_CONST;
+const dateConst = Date.now();
 const constReleaseDate = new Date(dateConst);
+
 
 export const postUser = async (userBody) => {
     const user = new WordLadderUsersModel(userBody);
@@ -23,13 +24,28 @@ export const getUser = async (userBody) => {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         const user = await WordLadderUsersModel.findOne({id: userBody.id});
         if(user){
-            let newUser = {...user.toJSON()};
-            if(user?.wordLadder?.one?.lastSolved !== diffDays - 1){
+            const newUser = JSON.parse(JSON.stringify(user.toJSON()))
+            if(user?.wordLadder?.one?.currentWordLadder?.currentPuzzle !== diffDays){
+                newUser.wordLadder.one.currentWordLadder.currentPuzzle = diffDays;
+                newUser.wordLadder.one.currentWordLadder.currentAttempt = [];
+                newUser.wordLadder.one.currentWordLadder.completed = false;
+                newUser.wordLadder.one.timeStarted = Date.now();
+                newUser.wordLadder.one.timeFinished = null;
+            } else if (user?.wordLadder?.two?.currentWordLadder?.currentPuzzle !== diffDays){
+                newUser.wordLadder.two.currentWordLadder.currentPuzzle = diffDays;
+                newUser.wordLadder.two.currentWordLadder.currentAttempt = [];
+                newUser.wordLadder.two.currentWordLadder.completed = false;
+                newUser.wordLadder.two.timeStarted = Date.now();
+                newUser.wordLadder.two.timeFinished = null;
+            }
+            
+            if(user?.wordLadder?.one?.lastSolved !== diffDays - 1 && user?.wordLadder?.one?.lastSolved !== diffDays){
                 newUser.wordLadder.one.currentStreak = 0;
-            } else if(user?.wordLadder?.two?.lastSolved !== diffDays - 1){
+            } else if(user?.wordLadder?.two?.lastSolved !== diffDays - 1 && user?.wordLadder?.two?.lastSolved !== diffDays){
                 newUser.wordLadder.two.currentStreak = 0;
             }
-            return newUser;
+            updateUser(user.id, newUser)
+            return newUser
         } else {
             return await postUser(userBody)
         }
