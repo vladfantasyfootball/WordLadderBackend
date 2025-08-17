@@ -1,8 +1,8 @@
 import { WordLadderUsersModel } from "../models/user.js";
 import dotenv from 'dotenv'
 dotenv.config();
-// const dateConst = process.env.DATE_CONST;
-const dateConst = Date.now();
+const dateConst = process.env.DATE_CONST;
+// const dateConst = Date.now();
 const constReleaseDate = new Date(dateConst);
 
 
@@ -43,6 +43,11 @@ export const getUser = async (userBody) => {
                 newUser.wordLadder.one.currentStreak = 0;
             } else if(user?.wordLadder?.two?.lastSolved !== diffDays - 1 && user?.wordLadder?.two?.lastSolved !== diffDays){
                 newUser.wordLadder.two.currentStreak = 0;
+            } 
+
+            if(user?.ad?.adWatched && user?.ad?.dateWatched !== new Date().toLocaleString().split(',')[0]) {
+                newUser.ad.adWatched = false;
+                newUser.ad.dateWatched = null;
             }
             updateUser(user.id, newUser)
             return newUser

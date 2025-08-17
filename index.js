@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 // import { processLineByLine } from './src/controllers/populateValidEnglishWordsCollection.js';
 
 const mongoString = process.env.DATABASE_URL;
+console.log(mongoString)
 mongoose.connect(mongoString, { useNewUrlParser: true, useUnifiedTopology: true });
 const database = mongoose.connection;
 

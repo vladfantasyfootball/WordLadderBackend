@@ -1,4 +1,4 @@
-["AA",
+export const englishWords = new Set(["AA",
 "AAH",
 "AAHED",
 "AAHING",
@@ -178688,4 +178688,4 @@
 "ZYMURGY",
 "ZYZZYVA",
 "ZYZZYVAS",
-"ZZZ"]
+"ZZZ"])
