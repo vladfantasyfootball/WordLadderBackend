@@ -12,6 +12,10 @@ export const LevelOnePuzzlesSchema = new mongoose.Schema({
     endingWord: {
         type: String,
         required: true
+    },
+    shortestSolution: {
+        type: [String],
+        required: true
     }
 });
 

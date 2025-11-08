@@ -3,7 +3,6 @@ dotenv.config();
 import express from 'express';
 import { router } from './routes/routes.js';
 import mongoose from 'mongoose';
-// import { processLineByLine } from './src/controllers/populateValidEnglishWordsCollection.js';
 
 const mongoString = process.env.DATABASE_URL;
 console.log(mongoString)
