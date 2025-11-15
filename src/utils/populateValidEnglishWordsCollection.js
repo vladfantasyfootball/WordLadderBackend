@@ -1,5 +1,5 @@
 import { LevelOnePuzzlesModel } from '../models/levelOnePuzzles.js';
-import {englishWords} from './mydictionary.js';
+import {englishWords} from '../controllers/conciseEnglishWords.js';
 
 const findWordLadderBidirectional = (startWord, endWord, maxDepth = 10) => {
     startWord = startWord.toUpperCase().trim();
@@ -197,7 +197,7 @@ export function getRandomWord(options = {}) {
       if (start !== end && !used.has(key) && start.length === end.length) {
         const result = findWordLadderBidirectional(start, end);
         
-        if (result.possible && result.steps >= 5 && result.steps <= 10) {
+        if (result.possible && result.steps >= 4 && result.steps <= 12) {
           puzzles.push({
             id: currentId++,
             startingWord: start,

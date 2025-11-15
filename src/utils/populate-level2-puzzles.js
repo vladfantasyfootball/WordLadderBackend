@@ -1,5 +1,5 @@
 import { LevelTwoPuzzlesModel } from '../models/levelTwoPuzzles.js';
-import {englishWords} from './mydictionary.js';
+import {englishWords} from '../controllers/conciseEnglishWords.js';
 import { getRandomWord } from './populateValidEnglishWordsCollection.js';
 
 // Helper function to get all valid anagrams of a word
@@ -187,15 +187,15 @@ const getAnagrams = (word) => {
     const puzzles = [];
     const used = new Set();
     let currentId = startingId;
-    const wordList = Array.from(englishWords);
     
     while (puzzles.length < targetCount) {
-        const start = getRandomWord(
+          const start = getRandomWord(
             {minLength: 4, maxLength: 4}
           );
           const end = getRandomWord(        
             {minLength: 4, maxLength: 4}
           );
+
           console.log('trying:' , start, end)
       const key = `${start}-${end}`;
       
