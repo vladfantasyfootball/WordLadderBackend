@@ -1,8 +1,8 @@
 import { WordLadderUsersModel } from "../models/user.js";
 import dotenv from 'dotenv'
 dotenv.config();
-const dateConst = process.env.DATE_CONST;
-// const dateConst = Date.now();
+// const dateConst = process.env.DATE_CONST;
+const dateConst = Date.now();
 const constReleaseDate = new Date(dateConst);
 
 
@@ -29,13 +29,13 @@ export const getUser = async (userBody) => {
                 newUser.wordLadder.one.currentWordLadder.currentPuzzle = diffDays;
                 newUser.wordLadder.one.currentWordLadder.currentAttempt = [];
                 newUser.wordLadder.one.currentWordLadder.completed = false;
-                newUser.wordLadder.one.timeStarted = Date.now();
+                newUser.wordLadder.one.timeStarted = null;
                 newUser.wordLadder.one.timeFinished = null;
             } else if (user?.wordLadder?.two?.currentWordLadder?.currentPuzzle !== diffDays){
                 newUser.wordLadder.two.currentWordLadder.currentPuzzle = diffDays;
                 newUser.wordLadder.two.currentWordLadder.currentAttempt = [];
                 newUser.wordLadder.two.currentWordLadder.completed = false;
-                newUser.wordLadder.two.timeStarted = Date.now();
+                newUser.wordLadder.two.timeStarted = null;
                 newUser.wordLadder.two.timeFinished = null;
             }
             
