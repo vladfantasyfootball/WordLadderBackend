@@ -1,8 +1,8 @@
 import { WordLadderUsersModel } from "../models/user.js";
 import dotenv from 'dotenv'
 dotenv.config();
-// const dateConst = process.env.DATE_CONST;
-const dateConst = Date.now();
+const dateConst = process.env.DATE_CONST;
+// const dateConst = Date.now();
 const constReleaseDate = new Date(dateConst);
 
 
