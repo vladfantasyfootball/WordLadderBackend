@@ -31,7 +31,8 @@ export const getUser = async (userBody) => {
                 newUser.wordLadder.one.currentWordLadder.completed = false;
                 newUser.wordLadder.one.timeStarted = null;
                 newUser.wordLadder.one.timeFinished = null;
-            } else if (user?.wordLadder?.two?.currentWordLadder?.currentPuzzle !== diffDays){
+            }
+            if (user?.wordLadder?.two?.currentWordLadder?.currentPuzzle !== diffDays){
                 newUser.wordLadder.two.currentWordLadder.currentPuzzle = diffDays;
                 newUser.wordLadder.two.currentWordLadder.currentAttempt = [];
                 newUser.wordLadder.two.currentWordLadder.completed = false;
@@ -41,7 +42,8 @@ export const getUser = async (userBody) => {
             
             if(user?.wordLadder?.one?.lastSolved !== diffDays - 1 && user?.wordLadder?.one?.lastSolved !== diffDays){
                 newUser.wordLadder.one.currentStreak = 0;
-            } else if(user?.wordLadder?.two?.lastSolved !== diffDays - 1 && user?.wordLadder?.two?.lastSolved !== diffDays){
+            }
+            if(user?.wordLadder?.two?.lastSolved !== diffDays - 1 && user?.wordLadder?.two?.lastSolved !== diffDays){
                 newUser.wordLadder.two.currentStreak = 0;
             } 
 
