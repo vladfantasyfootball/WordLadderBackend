@@ -52,9 +52,6 @@ export const userUpdateSchema = Joi.object({
 
 // Validation middleware
 export const validateUserUpdate = (req, res, next) => {
-    console.log('=== User Update Validation ===');
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-    
     const { error } = userUpdateSchema.validate(req.body.userUpdate, { 
         abortEarly: false, // Show all errors, not just first
         stripUnknown: true // Remove unknown fields
@@ -69,6 +66,5 @@ export const validateUserUpdate = (req, res, next) => {
         });
     }
 
-    console.log('Validation passed');
     next();
 };
