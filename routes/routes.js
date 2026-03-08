@@ -3,6 +3,7 @@ import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.
 import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
 import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
 import { verifyToken } from '../src/middleware/auth.js';
+import { validateUserUpdate } from '../src/validation/userValidation.js';
 
 export const router = express.Router()
  
@@ -40,7 +41,7 @@ router.post('/getUser', verifyToken, async (req, res) => {
 })
 
 //Update by ID Method
-router.post('/updateUser', verifyToken, async (req, res) => {
+router.post('/updateUser', verifyToken, validateUserUpdate, async (req, res) => {
     try {
         let user = await updateUser(req.body.id, req.body.userUpdate);
         if(user){
