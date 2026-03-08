@@ -8,6 +8,7 @@ import { scheduleDailyNotifications } from './src/services/notificationService.j
 
 const mongoString = process.env.DATABASE_URL;
 console.log(mongoString)
+console.log('DATE_CONST:', process.env.DATE_CONST);
 mongoose.connect(mongoString, { useNewUrlParser: true, useUnifiedTopology: true });
 const database = mongoose.connection;
 
@@ -22,6 +23,9 @@ database.once('connected', () => {
 })
 
 const app = express();
+
+// Trust proxy for Railway deployment
+app.set('trust proxy', 1);
 
 // Rate limiting middleware
 const limiter = rateLimit({
