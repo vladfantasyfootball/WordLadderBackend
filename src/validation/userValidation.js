@@ -4,7 +4,7 @@ import Joi from 'joi';
 const wordLadderLevelSchema = Joi.object({
     currentWordLadder: Joi.object({
         currentPuzzle: Joi.number().allow(null).optional(),
-        currentAttempt: Joi.array().items(Joi.string()).required(),
+        currentAttempt: Joi.array().items(Joi.string().allow('')).optional().default([]),
         completed: Joi.boolean().required()
     }).required(),
     timeStarted: Joi.number().allow(null).optional(),
