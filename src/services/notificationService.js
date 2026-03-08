@@ -120,8 +120,15 @@ export async function sendDailyPuzzleNotifications() {
 /**
  * Schedules the daily notification job
  * Runs every day at 4 PM UTC (8 AM PT / 11 AM ET)
+ * Only runs in production (Railway) environment
  */
 export function scheduleDailyNotifications() {
+    // Only run cron job in production environment (Railway)
+    if (process.env.NODE_ENV !== 'production' && !process.env.RAILWAY_ENVIRONMENT) {
+        console.log('Skipping notification scheduler - not in production environment');
+        return;
+    }
+
     // Run every day at 4:00 PM UTC (8 AM Pacific / 11 AM Eastern)
     // Cron format: minute hour day month weekday
     // '0 16 * * *' = At 16:00 (4 PM) every day
