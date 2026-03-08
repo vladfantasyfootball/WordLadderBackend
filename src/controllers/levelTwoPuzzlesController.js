@@ -18,9 +18,16 @@ export const postLevelTwoPuzzle = async (puzzleBody) => {
 }
 
 export const getLevelTwoPuzzle = async () => {
-    const currentDate = Date.now()
-    const diffTime = Math.abs(currentDate - constReleaseDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // Calculate puzzle day number based on UTC calendar days
+    const today = new Date();
+    const releaseDate = new Date(constReleaseDate);
+    
+    // Get UTC midnight for both dates
+    const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const releaseDateUTC = Date.UTC(releaseDate.getUTCFullYear(), releaseDate.getUTCMonth(), releaseDate.getUTCDate());
+    
+    // Calculate difference in calendar days
+    const diffDays = Math.floor((todayUTC - releaseDateUTC) / (1000 * 60 * 60 * 24)) + 1;
     console.log(diffDays)
     try {
         const levelTwoPuzzle = await LevelTwoPuzzlesModel.findOne({id: diffDays});

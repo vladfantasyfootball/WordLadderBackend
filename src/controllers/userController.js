@@ -19,9 +19,16 @@ export const postUser = async (userBody) => {
 
 export const getUser = async (userBody) => {
     try {
-        const currentDate = Date.now()
-        const diffTime = Math.abs(currentDate - constReleaseDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // Calculate puzzle day number based on UTC calendar days
+        const today = new Date();
+        const releaseDate = new Date(constReleaseDate);
+        
+        // Get UTC midnight for both dates
+        const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+        const releaseDateUTC = Date.UTC(releaseDate.getUTCFullYear(), releaseDate.getUTCMonth(), releaseDate.getUTCDate());
+        
+        // Calculate difference in calendar days
+        const diffDays = Math.floor((todayUTC - releaseDateUTC) / (1000 * 60 * 60 * 24)) + 1;
         const user = await WordLadderUsersModel.findOne({id: userBody.id});
         if(user){
             const newUser = JSON.parse(JSON.stringify(user.toJSON()))
@@ -48,7 +55,6 @@ export const getUser = async (userBody) => {
             } 
 
             // Get current date in UTC as YYYY-MM-DD format
-            const today = new Date();
             const currentUTCDate = today.toISOString().split('T')[0];
             
             if(user?.ad?.adWatched && user?.ad?.dateWatched !== currentUTCDate) {
