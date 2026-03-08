@@ -22,6 +22,12 @@ const adSchema = Joi.object({
     dateWatched: Joi.string().allow(null).optional()
 });
 
+// Schema for purchases data
+const purchasesSchema = Joi.object({
+    level2: Joi.boolean().optional(),
+    noAdds: Joi.boolean().optional()
+}).optional();
+
 // Main user update schema
 export const userUpdateSchema = Joi.object({
     id: Joi.string().required(),
@@ -31,12 +37,16 @@ export const userUpdateSchema = Joi.object({
         three: wordLadderLevelSchema.optional()
     }).required(),
     ad: adSchema.optional(),
+    purchases: purchasesSchema,
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key
 }).unknown(false); // Don't allow unknown fields
 
 // Validation middleware
 export const validateUserUpdate = (req, res, next) => {
+    console.log('=== User Update Validation ===');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    
     const { error } = userUpdateSchema.validate(req.body.userUpdate, { 
         abortEarly: false, // Show all errors, not just first
         stripUnknown: true // Remove unknown fields
@@ -44,11 +54,13 @@ export const validateUserUpdate = (req, res, next) => {
 
     if (error) {
         const errorMessages = error.details.map(detail => detail.message);
+        console.error('Validation failed:', errorMessages);
         return res.status(400).json({ 
             error: 'Invalid user data',
             details: errorMessages 
         });
     }
 
+    console.log('Validation passed');
     next();
 };
