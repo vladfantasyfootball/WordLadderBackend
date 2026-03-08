@@ -28,6 +28,12 @@ const purchasesSchema = Joi.object({
     noAdds: Joi.boolean().optional()
 }).optional();
 
+// Schema for notifications data
+const notificationsSchema = Joi.object({
+    enabled: Joi.boolean().required(),
+    expoPushToken: Joi.string().allow(null).optional()
+}).optional();
+
 // Main user update schema
 export const userUpdateSchema = Joi.object({
     id: Joi.string().required(),
@@ -38,6 +44,7 @@ export const userUpdateSchema = Joi.object({
     }).required(),
     ad: adSchema.optional(),
     purchases: purchasesSchema,
+    notifications: notificationsSchema,
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key
 }).unknown(false); // Don't allow unknown fields

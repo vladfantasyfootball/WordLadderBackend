@@ -4,6 +4,7 @@ import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.
 import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
 import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
+import { sendDailyPuzzleNotifications } from '../src/services/notificationService.js';
 
 export const router = express.Router()
  
@@ -73,5 +74,18 @@ router.get('/getPuzzles', verifyToken, async (req, res) => {
     catch(e) {
         console.log(e);
         res.status(500).send("Error retrieving puzzles")
+    }
+})
+
+// Test endpoint to manually trigger notifications (for testing)
+router.post('/testNotifications', verifyToken, async (req, res) => {
+    try {
+        console.log('Manual notification test triggered');
+        await sendDailyPuzzleNotifications();
+        res.status(200).send({ message: "Notifications sent successfully" });
+    }
+    catch(e) {
+        console.log(e);
+        res.status(500).send("Error sending notifications")
     }
 })

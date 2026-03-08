@@ -54,6 +54,14 @@ export const WordLadderUsersSchema = new mongoose.Schema({
             "level2": false,
             "noAdds": false,
         }
+    },
+    notifications: {
+        type: Object,
+        required: true,
+        default: {
+            enabled: false,
+            expoPushToken: null
+        }
     }
 });
 

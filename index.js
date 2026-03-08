@@ -4,6 +4,7 @@ import express from 'express';
 import { router } from './routes/routes.js';
 import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
+import { scheduleDailyNotifications } from './src/services/notificationService.js';
 
 const mongoString = process.env.DATABASE_URL;
 console.log(mongoString)
@@ -16,6 +17,8 @@ database.on('error', (error) => {
 
 database.once('connected', () => {
     console.log('Database Connected');
+    // Initialize the notification scheduler after database connection
+    scheduleDailyNotifications();
 })
 
 const app = express();
