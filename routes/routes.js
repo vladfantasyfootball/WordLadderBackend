@@ -2,11 +2,12 @@ import express from 'express';
 import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
 import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
 import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
+import { verifyToken } from '../src/middleware/auth.js';
 
 export const router = express.Router()
  
 //Post Method
-router.post('/post', async (req, res) => {
+router.post('/post', verifyToken, async (req, res) => {
     try {
         let user = await postUser(req.body);
         if(user){
@@ -22,7 +23,7 @@ router.post('/post', async (req, res) => {
 })
 
 //Get by ID Method
-router.post('/getUser', async (req, res) => {
+router.post('/getUser', verifyToken, async (req, res) => {
     try {
         let user = await getUser(req.body);
         if(user){
@@ -39,7 +40,7 @@ router.post('/getUser', async (req, res) => {
 })
 
 //Update by ID Method
-router.post('/updateUser', async (req, res) => {
+router.post('/updateUser', verifyToken, async (req, res) => {
     try {
         let user = await updateUser(req.body.id, req.body.userUpdate);
         if(user){
@@ -56,7 +57,7 @@ router.post('/updateUser', async (req, res) => {
 })
 
 //Get level one puzzle by ID Method
-router.get('/getPuzzles', async (req, res) => {
+router.get('/getPuzzles', verifyToken, async (req, res) => {
     try {
         let levelOnePuzzle = await getLevelOnePuzzle();
         let levelTwoPuzzle = await getLevelTwoPuzzle();

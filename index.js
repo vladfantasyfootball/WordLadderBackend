@@ -19,9 +19,21 @@ database.once('connected', () => {
 const app = express();
 
 var allowCrossDomain = function(req, res, next) {
-    res.header('Access-Control-Allow-Origin', "*");
+    // Allow requests from your mobile app and localhost for development
+    const allowedOrigins = [
+        'http://localhost:8081',
+        'exp://localhost:8081',
+        'capacitor://localhost',
+        'ionic://localhost'
+    ];
+    
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin) || !origin) {
+        res.header('Access-Control-Allow-Origin', origin || '*');
+    }
+    
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
     next();
 };
 
