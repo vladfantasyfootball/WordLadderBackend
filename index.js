@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import { router } from './routes/routes.js';
 import mongoose from 'mongoose';
+import rateLimit from 'express-rate-limit';
 
 const mongoString = process.env.DATABASE_URL;
 console.log(mongoString)
@@ -16,7 +17,17 @@ database.on('error', (error) => {
 database.once('connected', () => {
     console.log('Database Connected');
 })
+
 const app = express();
+
+// Rate limiting middleware
+const limiter = rateLimit({
+    windowMs: 2 * 60 * 1000, // 2 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 var allowCrossDomain = function(req, res, next) {
     // Allow requests from your mobile app and localhost for development
@@ -38,6 +49,9 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
+
+// Apply rate limiter to all API routes
+app.use('/api', limiter);
 
 app.use(express.json());
 

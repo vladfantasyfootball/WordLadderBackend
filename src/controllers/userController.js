@@ -64,7 +64,7 @@ export const getUser = async (userBody) => {
 
 export const updateUser = async (userId, userUpdate) => {
     try{
-        const user = await WordLadderUsersModel.findOneAndUpdate({id: userId}, userUpdate)
+        const user = await WordLadderUsersModel.findOneAndUpdate({id: userId}, userUpdate, {new: true})
         return user
     } catch (error) {
         console.log(error);
