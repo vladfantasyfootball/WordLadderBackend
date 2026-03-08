@@ -47,7 +47,11 @@ export const getUser = async (userBody) => {
                 newUser.wordLadder.two.currentStreak = 0;
             } 
 
-            if(user?.ad?.adWatched && user?.ad?.dateWatched !== new Date().toLocaleString().split(',')[0]) {
+            // Get current date in UTC as YYYY-MM-DD format
+            const today = new Date();
+            const currentUTCDate = today.toISOString().split('T')[0];
+            
+            if(user?.ad?.adWatched && user?.ad?.dateWatched !== currentUTCDate) {
                 newUser.ad.adWatched = false;
                 newUser.ad.dateWatched = null;
             }
