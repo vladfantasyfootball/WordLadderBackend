@@ -31,7 +31,8 @@ const purchasesSchema = Joi.object({
 // Schema for notifications data
 const notificationsSchema = Joi.object({
     enabled: Joi.boolean().required(),
-    expoPushToken: Joi.string().allow(null).optional()
+    expoPushToken: Joi.string().allow(null).optional(),
+    hasBeenAskedForNotifications: Joi.boolean().optional()
 }).optional();
 
 // Main user update schema
