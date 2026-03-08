@@ -5,7 +5,9 @@ dotenv.config();
 const dateConst = process.env.DATE_CONST;
 // const dateConst = Date.now();
 
-const constReleaseDate = new Date(dateConst);
+// Remove quotes if present
+const cleanDateConst = dateConst ? dateConst.replace(/"/g, '') : null;
+const constReleaseDate = new Date(cleanDateConst);
 
 export const postLevelOnePuzzle = async (puzzleBody) => {
     const levelOnePuzzle = new LevelOnePuzzlesModel(puzzleBody);
@@ -21,10 +23,11 @@ export const postLevelOnePuzzle = async (puzzleBody) => {
 export const getLevelOnePuzzle = async () => {
     // Calculate puzzle day number based on UTC calendar days
     const today = new Date();
-    const releaseDate = new Date(dateConst); // Use dateConst string directly, not constReleaseDate
+    const releaseDate = new Date(cleanDateConst);
     
     console.log('=== Level One Puzzle Calculation ===');
-    console.log('DATE_CONST:', dateConst);
+    console.log('DATE_CONST (raw):', dateConst);
+    console.log('DATE_CONST (clean):', cleanDateConst);
     console.log('Release Date:', releaseDate);
     console.log('Today:', today);
     
