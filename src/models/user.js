@@ -30,6 +30,8 @@ export const WordLadderUsersSchema = new mongoose.Schema({
                 "lastSolved": null,
                 "totalScore": 0,
                 "highScore": 0,
+                "totalAttempted": 0,
+                "totalSolved": 0,
             },
             "two": {
                 "currentWordLadder": {
@@ -44,6 +46,8 @@ export const WordLadderUsersSchema = new mongoose.Schema({
                 "lastSolved": null,
                 "totalScore": 0,
                 "highScore": 0,
+                "totalAttempted": 0,
+                "totalSolved": 0,
             }
         }
     },

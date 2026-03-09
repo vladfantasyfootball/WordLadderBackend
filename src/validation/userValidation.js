@@ -13,7 +13,9 @@ const wordLadderLevelSchema = Joi.object({
     longestStreak: Joi.number().min(0).required(),
     lastSolved: Joi.number().allow(null).optional(),
     totalScore: Joi.number().min(0).required(),
-    highScore: Joi.number().min(0).required()
+    highScore: Joi.number().min(0).required(),
+    totalAttempted: Joi.number().min(0).optional(),
+    totalSolved: Joi.number().min(0).optional()
 });
 
 // Schema for ad data
