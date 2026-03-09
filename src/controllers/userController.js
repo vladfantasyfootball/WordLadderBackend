@@ -15,7 +15,7 @@ export const postUser = async (userBody) => {
         await user.save();
         return user;
     } catch (error) {
-        console.log(error);
+        console.error('Error saving user:', error);
         return null;
     }
 }
@@ -70,7 +70,7 @@ export const getUser = async (userBody) => {
             return await postUser(userBody)
         }
     } catch (error) {
-        console.log(error);
+        console.error('Error getting user:', error);
         return null;
     }
 }
