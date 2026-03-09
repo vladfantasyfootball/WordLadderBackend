@@ -3,7 +3,10 @@ import dotenv from 'dotenv'
 dotenv.config();
 const dateConst = process.env.DATE_CONST;
 // const dateConst = Date.now();
-const constReleaseDate = new Date(dateConst);
+
+// Remove quotes if present (same fix as puzzle controllers)
+const cleanDateConst = dateConst ? dateConst.replace(/"/g, '') : null;
+const constReleaseDate = new Date(cleanDateConst);
 
 
 export const postUser = async (userBody) => {
