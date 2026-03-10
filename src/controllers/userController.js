@@ -22,8 +22,10 @@ export const postUser = async (userBody) => {
 
 export const getUser = async (userBody) => {
     try {
-        // Calculate puzzle day number based on UTC calendar days
-        const today = new Date();
+        // Calculate puzzle day number.
+        // Subtract 7 hours so the day rolls over at UTC 07:00 = 11 PM PT / 2 AM ET.
+        const now = new Date();
+        const today = new Date(now.getTime() - 7 * 60 * 60 * 1000);
         const releaseDate = new Date(constReleaseDate);
         
         // Get UTC midnight for both dates
@@ -57,7 +59,7 @@ export const getUser = async (userBody) => {
                 newUser.wordLadder.two.currentStreak = 0;
             } 
 
-            // Get current date in UTC as YYYY-MM-DD format
+            // Get shifted date as YYYY-MM-DD — matches puzzle day boundary (UTC 07:00 = 11 PM PT)
             const currentUTCDate = today.toISOString().split('T')[0];
             
             if(user?.ad?.adWatched && user?.ad?.dateWatched !== currentUTCDate) {

@@ -21,8 +21,10 @@ export const postLevelOnePuzzle = async (puzzleBody) => {
 }
 
 export const getLevelOnePuzzle = async () => {
-    // Calculate puzzle day number based on UTC calendar days
-    const today = new Date();
+    // Calculate puzzle day number.
+    // Subtract 7 hours so the day rolls over at UTC 07:00 = 11 PM PT / 2 AM ET.
+    const now = new Date();
+    const today = new Date(now.getTime() - 7 * 60 * 60 * 1000);
     const releaseDate = new Date(cleanDateConst);
     
     // Get UTC midnight for both dates
