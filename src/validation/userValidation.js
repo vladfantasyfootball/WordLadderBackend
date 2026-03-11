@@ -12,6 +12,7 @@ const wordLadderLevelSchema = Joi.object({
     currentStreak: Joi.number().min(0).required(),
     longestStreak: Joi.number().min(0).required(),
     lastSolved: Joi.number().allow(null).optional(),
+    lastAttempted: Joi.number().allow(null).optional(),
     totalScore: Joi.number().min(0).required(),
     highScore: Joi.number().min(0).required(),
     totalAttempted: Joi.number().min(0).optional(),

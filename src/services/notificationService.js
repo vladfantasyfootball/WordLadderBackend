@@ -6,7 +6,9 @@ import { WordLadderUsersModel } from '../models/user.js';
 const expo = new Expo();
 
 /**
- * Gets the current puzzle day based on the release date
+ * Gets the current puzzle day based on the release date.
+ * Uses the same 7-hour UTC offset as userController / puzzle controllers so that
+ * the day number matches what is stored in user.wordLadder.*.lastSolved.
  * @returns {number} The current puzzle day
  */
 function getCurrentPuzzleDay() {
@@ -18,12 +20,15 @@ function getCurrentPuzzleDay() {
         releaseDate.getUTCDate()
     );
 
+    // Subtract 7 hours so the day rolls over at UTC 07:00 (1 AM CT),
+    // matching the logic in userController and puzzle controllers.
     const now = new Date();
-    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    const today = new Date(now.getTime() - 7 * 60 * 60 * 1000);
+    const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
 
     const elapsed = todayUTC - releaseDateUTC;
     const dayNumber = Math.floor(elapsed / (1000 * 60 * 60 * 24)) + 1;
-    
+
     return dayNumber;
 }
 
@@ -43,16 +48,17 @@ export async function sendDailyPuzzleNotifications() {
 
         console.log(`Found ${users.length} users with notifications enabled`);
 
-        // Filter users who haven't played today's puzzle yet
+        // Filter users who haven't attempted today's puzzle yet.
+        // lastAttempted is set the first time a user opens a puzzle for a given day,
+        // making it a reliable signal that is independent of completion state.
         const usersToNotify = users.filter(user => {
-            const levelOneLastSolved = user.wordLadder?.one?.lastSolved;
-            const levelTwoLastSolved = user.wordLadder?.two?.lastSolved;
-            
-            // Check if user hasn't solved either level's puzzle today
-            const hasntPlayedLevelOne = !levelOneLastSolved || levelOneLastSolved < currentDay;
-            const hasntPlayedLevelTwo = !levelTwoLastSolved || levelTwoLastSolved < currentDay;
-            
-            return hasntPlayedLevelOne || hasntPlayedLevelTwo;
+            const levelOneLastAttempted = user.wordLadder?.one?.lastAttempted;
+            const levelTwoLastAttempted = user.wordLadder?.two?.lastAttempted;
+
+            const hasntAttemptedLevelOne = !levelOneLastAttempted || levelOneLastAttempted < currentDay;
+            const hasntAttemptedLevelTwo = !levelTwoLastAttempted || levelTwoLastAttempted < currentDay;
+
+            return hasntAttemptedLevelOne || hasntAttemptedLevelTwo;
         });
 
         console.log(`${usersToNotify.length} users haven't played today's puzzle`);
@@ -118,9 +124,11 @@ export async function sendDailyPuzzleNotifications() {
 }
 
 /**
- * Schedules the daily notification job
- * Runs every day at 4 PM UTC (8 AM PT / 11 AM ET)
- * Only runs in production (Railway) environment
+ * Schedules the daily notification job.
+ * Runs every day at 16:00 UTC = 10 AM CST (UTC-6) / 11 AM CDT (UTC-5).
+ * To reliably hit 10 AM CT year-round despite DST, the timezone is set to
+ * "America/Chicago" and the cron fires at 10:00 local time.
+ * Only runs in production (Railway) environment.
  */
 export function scheduleDailyNotifications() {
     // Only run cron job in production environment (Railway)
@@ -129,21 +137,15 @@ export function scheduleDailyNotifications() {
         return;
     }
 
-    // Run every day at 4:00 PM UTC (8 AM Pacific / 11 AM Eastern)
+    // Run every day at 10:00 AM CT (handles CST/CDT automatically via timezone)
     // Cron format: minute hour day month weekday
-    // '0 16 * * *' = At 16:00 (4 PM) every day
-    
-    cron.schedule('0 16 * * *', async () => {
+    cron.schedule('0 10 * * *', async () => {
         console.log('Daily notification cron job triggered');
         await sendDailyPuzzleNotifications();
     }, {
         scheduled: true,
-        timezone: "UTC"
+        timezone: "America/Chicago"
     });
 
-    console.log('Daily puzzle notification scheduler initialized (4 PM UTC / 8 AM PT / 11 AM ET)');
-    
-    // Optionally run once at startup for testing
-    // Uncomment the line below to test immediately when server starts
-    // sendDailyPuzzleNotifications();
+    console.log('Daily puzzle notification scheduler initialized (10:00 AM CT)');
 }
