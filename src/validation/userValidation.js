@@ -41,6 +41,7 @@ export const userUpdateSchema = Joi.object({
         three: wordLadderLevelSchema.optional()
     }).required(),
     ad: adSchema.optional(),
+    purchases: Joi.any().optional(), // present in client payload but never written via this endpoint
     notifications: notificationsSchema,
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key

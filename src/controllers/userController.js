@@ -79,7 +79,9 @@ export const getUser = async (userBody) => {
 
 export const updateUser = async (userId, userUpdate) => {
     try{
-        const user = await WordLadderUsersModel.findOneAndUpdate({id: userId}, userUpdate, {new: true})
+        // Explicitly exclude fields that must never be changed via this endpoint
+        const { purchases, _id, __v, ...safeUpdate } = userUpdate;
+        const user = await WordLadderUsersModel.findOneAndUpdate({id: userId}, { $set: safeUpdate }, {new: true})
         return user
     } catch (error) {
         console.log(error);
