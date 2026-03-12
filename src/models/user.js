@@ -57,8 +57,7 @@ export const WordLadderUsersSchema = new mongoose.Schema({
         type: Object,
         required: true,
         default: {
-            "level2": false,
-            "noAdds": false,
+            "premium": false,
         }
     },
     notifications: {

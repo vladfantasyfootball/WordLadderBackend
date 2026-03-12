@@ -2,6 +2,7 @@ import express from 'express';
 import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
 import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
 import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
+import { verifyPurchase } from '../src/controllers/purchasesController.js';
 import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
 import { sendDailyPuzzleNotifications } from '../src/services/notificationService.js';
@@ -88,4 +89,9 @@ router.post('/testNotifications', verifyToken, async (req, res) => {
         console.log(e);
         res.status(500).send("Error sending notifications")
     }
+})
+
+// Verify purchase with RevenueCat and unlock premium
+router.post('/purchases/verify', verifyToken, async (req, res) => {
+    await verifyPurchase(req, res);
 })

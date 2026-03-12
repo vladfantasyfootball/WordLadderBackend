@@ -25,12 +25,6 @@ const adSchema = Joi.object({
     dateWatched: Joi.string().allow(null).optional()
 });
 
-// Schema for purchases data
-const purchasesSchema = Joi.object({
-    level2: Joi.boolean().optional(),
-    noAdds: Joi.boolean().optional()
-}).optional();
-
 // Schema for notifications data
 const notificationsSchema = Joi.object({
     enabled: Joi.boolean().required(),
@@ -47,7 +41,6 @@ export const userUpdateSchema = Joi.object({
         three: wordLadderLevelSchema.optional()
     }).required(),
     ad: adSchema.optional(),
-    purchases: purchasesSchema,
     notifications: notificationsSchema,
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key
