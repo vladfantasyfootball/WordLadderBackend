@@ -69,7 +69,14 @@ export const getUser = async (userBody) => {
             updateUser(user.id, newUser)
             return newUser
         } else {
-            return await postUser(userBody)
+            const newUser = await postUser(userBody);
+            if (!newUser) return null;
+            // Set the correct puzzle day immediately so the frontend never sees currentPuzzle: null
+            const newUserObj = JSON.parse(JSON.stringify(newUser.toJSON()));
+            newUserObj.wordLadder.one.currentWordLadder.currentPuzzle = diffDays;
+            newUserObj.wordLadder.two.currentWordLadder.currentPuzzle = diffDays;
+            updateUser(newUser.id, newUserObj);
+            return newUserObj;
         }
     } catch (error) {
         console.error('Error getting user:', error);
