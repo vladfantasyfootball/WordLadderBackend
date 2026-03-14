@@ -50,6 +50,23 @@ export const WordLadderUsersSchema = new mongoose.Schema({
                 "highScore": 0,
                 "totalAttempted": 0,
                 "totalSolved": 0,
+            },
+            "three": {
+                "currentWordLadder": {
+                    "currentPuzzle": null,
+                    "currentAttempt": [],
+                    "completed": false
+                },
+                "timeStarted": null,
+                "timeFinished": null,
+                "currentStreak": 0,
+                "longestStreak": 0,
+                "lastSolved": null,
+                "lastAttempted": null,
+                "totalScore": 0,
+                "highScore": 0,
+                "totalAttempted": 0,
+                "totalSolved": 0,
             }
         }
     },
