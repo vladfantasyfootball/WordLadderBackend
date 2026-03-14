@@ -51,12 +51,30 @@ export const getUser = async (userBody) => {
                 newUser.wordLadder.two.timeStarted = null;
                 newUser.wordLadder.two.timeFinished = null;
             }
+            if (user?.wordLadder?.three?.currentWordLadder?.currentPuzzle !== diffDays){
+                newUser.wordLadder.three = newUser.wordLadder.three || {
+                    currentWordLadder: { currentPuzzle: null, currentAttempt: [], completed: false },
+                    timeStarted: null, timeFinished: null,
+                    currentStreak: 0, longestStreak: 0,
+                    lastSolved: null, lastAttempted: null,
+                    totalScore: 0, highScore: 0,
+                    totalAttempted: 0, totalSolved: 0,
+                };
+                newUser.wordLadder.three.currentWordLadder.currentPuzzle = diffDays;
+                newUser.wordLadder.three.currentWordLadder.currentAttempt = [];
+                newUser.wordLadder.three.currentWordLadder.completed = false;
+                newUser.wordLadder.three.timeStarted = null;
+                newUser.wordLadder.three.timeFinished = null;
+            }
             
             if(user?.wordLadder?.one?.lastSolved !== diffDays - 1 && user?.wordLadder?.one?.lastSolved !== diffDays){
                 newUser.wordLadder.one.currentStreak = 0;
             }
             if(user?.wordLadder?.two?.lastSolved !== diffDays - 1 && user?.wordLadder?.two?.lastSolved !== diffDays){
                 newUser.wordLadder.two.currentStreak = 0;
+            }
+            if(newUser.wordLadder.three && user?.wordLadder?.three?.lastSolved !== diffDays - 1 && user?.wordLadder?.three?.lastSolved !== diffDays){
+                newUser.wordLadder.three.currentStreak = 0;
             } 
 
             // Get shifted date as YYYY-MM-DD — matches puzzle day boundary (UTC 07:00 = 11 PM PT)
@@ -75,6 +93,7 @@ export const getUser = async (userBody) => {
             const newUserObj = JSON.parse(JSON.stringify(newUser.toJSON()));
             newUserObj.wordLadder.one.currentWordLadder.currentPuzzle = diffDays;
             newUserObj.wordLadder.two.currentWordLadder.currentPuzzle = diffDays;
+            newUserObj.wordLadder.three.currentWordLadder.currentPuzzle = diffDays;
             updateUser(newUser.id, newUserObj);
             return newUserObj;
         }

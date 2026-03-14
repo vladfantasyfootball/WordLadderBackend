@@ -1,6 +1,7 @@
 import express from 'express';
 import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
 import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
+import { getLevelThreePuzzle } from '../src/controllers/levelThreePuzzlesController.js';
 import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
 import { verifyPurchase } from '../src/controllers/purchasesController.js';
 import { verifyToken } from '../src/middleware/auth.js';
@@ -64,9 +65,10 @@ router.get('/getPuzzles', verifyToken, async (req, res) => {
     try {
         let levelOnePuzzle = await getLevelOnePuzzle();
         let levelTwoPuzzle = await getLevelTwoPuzzle();
+        let levelThreePuzzle = await getLevelThreePuzzle();
 
         if(levelOnePuzzle && levelTwoPuzzle){
-            res.status(200).send({"one": levelOnePuzzle, "two": levelTwoPuzzle});
+            res.status(200).send({"one": levelOnePuzzle, "two": levelTwoPuzzle, "three": levelThreePuzzle || null});
         }
         else {
             res.status(500).send("Error retrieving puzzles")
