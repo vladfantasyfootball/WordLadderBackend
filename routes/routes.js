@@ -7,6 +7,7 @@ import { verifyPurchase } from '../src/controllers/purchasesController.js';
 import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
 import { sendDailyPuzzleNotifications } from '../src/services/notificationService.js';
+import { upsertLeaderboardEntry, getLeaderboard } from '../src/controllers/leaderboardController.js';
 
 export const router = express.Router()
  
@@ -49,6 +50,20 @@ router.post('/updateUser', verifyToken, validateUserUpdate, async (req, res) => 
         let user = await updateUser(req.body.id, req.body.userUpdate);
         if(user){
             res.status(200).send(user);
+            // Fire-and-forget leaderboard sync for each level
+            const wl = req.body.userUpdate.wordLadder;
+            const levelsToSync = ['one', 'two', 'three'];
+            for (const level of levelsToSync) {
+                const levelData = wl?.[level];
+                if (levelData && levelData.currentWordLadder?.completed) {
+                    upsertLeaderboardEntry(req.body.id, level, {
+                        totalScore:    levelData.totalScore    ?? 0,
+                        totalSolved:   levelData.totalSolved   ?? 0,
+                        currentStreak: levelData.currentStreak ?? 0,
+                        longestStreak: levelData.longestStreak ?? 0,
+                    }).catch(err => console.error(`Leaderboard upsert failed for level ${level}:`, err));
+                }
+            }
         }
         else {
             res.status(500).send("Error updating user")
@@ -96,4 +111,28 @@ router.post('/testNotifications', verifyToken, async (req, res) => {
 // Verify purchase with RevenueCat and unlock premium
 router.post('/purchases/verify', verifyToken, async (req, res) => {
     await verifyPurchase(req, res);
+})
+
+// Get leaderboard for a level + category
+// Query params: level (one|two|three), category (totalScore|averageScore|currentStreak|longestStreak|totalSolved)
+// Body: { userId }
+router.post('/leaderboard', verifyToken, async (req, res) => {
+    try {
+        const { level, category } = req.query;
+        const { userId } = req.body;
+
+        const validLevels = ['one', 'two', 'three'];
+        const validCategories = ['totalScore', 'averageScore', 'currentStreak', 'longestStreak', 'totalSolved'];
+
+        if (!validLevels.includes(level) || !validCategories.includes(category)) {
+            return res.status(400).send("Invalid level or category");
+        }
+
+        const data = await getLeaderboard(level, category, userId);
+        res.status(200).send(data);
+    }
+    catch(e) {
+        console.log(e);
+        res.status(500).send("Error retrieving leaderboard");
+    }
 })
