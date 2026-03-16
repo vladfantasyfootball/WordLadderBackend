@@ -12,7 +12,7 @@ const expo = new Expo();
  * @returns {number} The current puzzle day
  */
 function getCurrentPuzzleDay() {
-    const releaseDateString = process.env.DATE_CONST || "2026-03-08T00:00:00Z";
+    const releaseDateString = (process.env.DATE_CONST || "2026-03-08T00:00:00Z").replace(/"/g, '');
     const releaseDate = new Date(releaseDateString);
     const releaseDateUTC = Date.UTC(
         releaseDate.getUTCFullYear(),
