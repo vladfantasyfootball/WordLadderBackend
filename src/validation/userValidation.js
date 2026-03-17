@@ -32,6 +32,11 @@ const notificationsSchema = Joi.object({
     hasBeenAskedForNotifications: Joi.boolean().optional()
 }).optional();
 
+// Schema for review tracking
+const reviewSchema = Joi.object({
+    lastPromptedAt: Joi.number().min(0).required()
+}).optional();
+
 // Main user update schema
 export const userUpdateSchema = Joi.object({
     id: Joi.string().required(),
@@ -43,6 +48,7 @@ export const userUpdateSchema = Joi.object({
     ad: adSchema.optional(),
     purchases: Joi.any().optional(), // present in client payload but never written via this endpoint
     notifications: notificationsSchema,
+    review: reviewSchema,
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key
 }).unknown(false); // Don't allow unknown fields

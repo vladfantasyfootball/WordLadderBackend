@@ -85,6 +85,13 @@ export const WordLadderUsersSchema = new mongoose.Schema({
             expoPushToken: null,
             hasBeenAskedForNotifications: false
         }
+    },
+    review: {
+        type: Object,
+        required: false,
+        default: {
+            lastPromptedAt: 0
+        }
     }
 });
 
