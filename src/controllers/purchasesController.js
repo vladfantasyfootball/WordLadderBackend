@@ -12,8 +12,6 @@ const REVENUECAT_ENTITLEMENT_ID = 'premium';
 export const verifyPurchase = async (req, res) => {
     try {
         const firebaseUid = req.user.uid;
-        console.log(`[verifyPurchase] called for uid=${firebaseUid}`);
-        console.log(`[verifyPurchase] REVENUECAT_SECRET_KEY present=${!!REVENUECAT_SECRET_KEY}`);
 
         const rcResponse = await fetch(
             `https://api.revenuecat.com/v1/subscribers/${firebaseUid}`,
@@ -25,8 +23,6 @@ export const verifyPurchase = async (req, res) => {
             }
         );
 
-        console.log(`[verifyPurchase] RevenueCat response status=${rcResponse.status}`);
-
         if (!rcResponse.ok) {
             const body = await rcResponse.text();
             console.error(`[verifyPurchase] RevenueCat API error: status=${rcResponse.status} body=${body}`);
@@ -35,14 +31,10 @@ export const verifyPurchase = async (req, res) => {
 
         const rcData = await rcResponse.json();
         const entitlements = rcData?.subscriber?.entitlements ?? {};
-        console.log(`[verifyPurchase] entitlements keys=${Object.keys(entitlements).join(',') || 'none'}`);
-
         const entitlement = entitlements[REVENUECAT_ENTITLEMENT_ID];
-        console.log(`[verifyPurchase] '${REVENUECAT_ENTITLEMENT_ID}' entitlement=${JSON.stringify(entitlement)}`);
 
         // Non-consumable/lifetime purchases have expires_date === null
         const isPremium = !!entitlement && entitlement.expires_date === null;
-        console.log(`[verifyPurchase] isPremium=${isPremium}`);
 
         if (!isPremium) {
             return res.status(402).json({ error: 'No active premium entitlement found' });
@@ -59,7 +51,6 @@ export const verifyPurchase = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        console.log(`[verifyPurchase] successfully unlocked premium for uid=${firebaseUid}`);
         res.status(200).json(updatedUser);
     } catch (error) {
         console.error('[verifyPurchase] unexpected error:', error);

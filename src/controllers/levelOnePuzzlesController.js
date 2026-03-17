@@ -15,7 +15,7 @@ export const postLevelOnePuzzle = async (puzzleBody) => {
         await levelOnePuzzle.save();
         return levelOnePuzzle;
     } catch (error) {
-        console.log(error);
+        console.error('Error saving level one puzzle:', error);
         return null;
     }
 }

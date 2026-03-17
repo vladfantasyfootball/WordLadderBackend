@@ -110,7 +110,7 @@ export const updateUser = async (userId, userUpdate) => {
         const user = await WordLadderUsersModel.findOneAndUpdate({id: userId}, { $set: safeUpdate }, {new: true})
         return user
     } catch (error) {
-        console.log(error);
+        console.error('Error updating user:', error);
         return null;
     }
 }
