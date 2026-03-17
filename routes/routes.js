@@ -2,7 +2,7 @@ import express from 'express';
 import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
 import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
 import { getLevelThreePuzzle } from '../src/controllers/levelThreePuzzlesController.js';
-import { postUser, getUser, updateUser } from '../src/controllers/userController.js';
+import { postUser, getUser, updateUser, deleteUser } from '../src/controllers/userController.js';
 import { verifyPurchase } from '../src/controllers/purchasesController.js';
 import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
@@ -92,6 +92,20 @@ router.get('/getPuzzles', verifyToken, async (req, res) => {
     catch(e) {
         console.log(e);
         res.status(500).send("Error retrieving puzzles")
+    }
+})
+
+//Delete Account Method
+router.delete('/deleteUser', verifyToken, async (req, res) => {
+    try {
+        const success = await deleteUser(req.user.uid);
+        if (success) {
+            res.status(200).send({ message: 'Account deleted successfully' });
+        } else {
+            res.status(500).send('Error deleting account');
+        }
+    } catch {
+        res.status(500).send('Error deleting account');
     }
 })
 

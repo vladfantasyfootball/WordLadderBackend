@@ -1,4 +1,5 @@
 import { WordLadderUsersModel } from "../models/user.js";
+import admin from 'firebase-admin';
 import dotenv from 'dotenv'
 dotenv.config();
 const dateConst = process.env.DATE_CONST;
@@ -112,5 +113,16 @@ export const updateUser = async (userId, userUpdate) => {
     } catch (error) {
         console.error('Error updating user:', error);
         return null;
+    }
+}
+
+export const deleteUser = async (userId) => {
+    try {
+        await WordLadderUsersModel.findOneAndDelete({ id: userId });
+        await admin.auth().deleteUser(userId);
+        return true;
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        return false;
     }
 }
