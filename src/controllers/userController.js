@@ -1,4 +1,5 @@
 import { WordLadderUsersModel } from "../models/user.js";
+import { LeaderboardOneModel, LeaderboardTwoModel, LeaderboardThreeModel } from "../models/leaderboard.js";
 import admin from 'firebase-admin';
 import dotenv from 'dotenv'
 dotenv.config();
@@ -118,7 +119,12 @@ export const updateUser = async (userId, userUpdate) => {
 
 export const deleteUser = async (userId) => {
     try {
-        await WordLadderUsersModel.findOneAndDelete({ id: userId });
+        await Promise.all([
+            WordLadderUsersModel.findOneAndDelete({ id: userId }),
+            LeaderboardOneModel.deleteOne({ userId }),
+            LeaderboardTwoModel.deleteOne({ userId }),
+            LeaderboardThreeModel.deleteOne({ userId }),
+        ]);
         await admin.auth().deleteUser(userId);
         return true;
     } catch (error) {
