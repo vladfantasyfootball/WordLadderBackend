@@ -4,11 +4,11 @@ import express from 'express';
 import { router } from './routes/routes.js';
 import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 import { scheduleDailyNotifications } from './src/services/notificationService.js';
 
 const mongoString = process.env.DATABASE_URL;
-console.log(mongoString)
-console.log('DATE_CONST:', process.env.DATE_CONST);
 mongoose.connect(mongoString, { useNewUrlParser: true, useUnifiedTopology: true });
 const database = mongoose.connection;
 
@@ -56,6 +56,8 @@ var allowCrossDomain = function(req, res, next) {
 };
 
 app.use(allowCrossDomain);
+app.use(helmet());
+app.use(mongoSanitize());
 
 // Apply rate limiter to all API routes
 app.use('/api', limiter);
