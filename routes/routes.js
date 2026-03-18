@@ -109,16 +109,20 @@ router.delete('/deleteUser', verifyToken, async (req, res) => {
     }
 })
 
-// Test endpoint to manually trigger notifications (for testing)
-router.post('/testNotifications', verifyToken, async (req, res) => {
-    try {
-        console.log('Manual notification test triggered');
-        await sendDailyPuzzleNotifications();
-        res.status(200).send({ message: "Notifications sent successfully" });
+// Trigger daily notifications — called by Cloud Scheduler (not by app clients)
+// Secured by a shared secret in the X-Scheduler-Secret header
+router.post('/trigger-notifications', async (req, res) => {
+    const secret = process.env.SCHEDULER_SECRET;
+    if (!secret || req.headers['x-scheduler-secret'] !== secret) {
+        return res.status(401).send('Unauthorized');
     }
-    catch(e) {
-        console.log(e);
-        res.status(500).send("Error sending notifications")
+    try {
+        console.log('Cloud Scheduler triggered daily notifications');
+        await sendDailyPuzzleNotifications();
+        res.status(200).send({ message: 'Notifications sent successfully' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error sending notifications');
     }
 })
 

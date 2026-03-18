@@ -1,5 +1,4 @@
 import { Expo } from 'expo-server-sdk';
-import cron from 'node-cron';
 import { WordLadderUsersModel } from '../models/user.js';
 
 // Create a new Expo SDK client
@@ -123,29 +122,4 @@ export async function sendDailyPuzzleNotifications() {
     }
 }
 
-/**
- * Schedules the daily notification job.
- * Runs every day at 16:00 UTC = 10 AM CST (UTC-6) / 11 AM CDT (UTC-5).
- * To reliably hit 10 AM CT year-round despite DST, the timezone is set to
- * "America/Chicago" and the cron fires at 10:00 local time.
- * Only runs in production (Railway) environment.
- */
-export function scheduleDailyNotifications() {
-    // Only run cron job in production environment (Railway)
-    if (process.env.NODE_ENV !== 'production' && !process.env.RAILWAY_ENVIRONMENT) {
-        console.log('Skipping notification scheduler - not in production environment');
-        return;
-    }
 
-    // Run every day at 10:00 AM CT (handles CST/CDT automatically via timezone)
-    // Cron format: minute hour day month weekday
-    cron.schedule('0 10 * * *', async () => {
-        console.log('Daily notification cron job triggered');
-        await sendDailyPuzzleNotifications();
-    }, {
-        scheduled: true,
-        timezone: "America/Chicago"
-    });
-
-    console.log('Daily puzzle notification scheduler initialized (10:00 AM CT)');
-}

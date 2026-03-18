@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
-import { scheduleDailyNotifications } from './src/services/notificationService.js';
 
 const mongoString = process.env.DATABASE_URL;
 mongoose.connect(mongoString, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -18,13 +17,11 @@ database.on('error', (error) => {
 
 database.once('connected', () => {
     console.log('Database Connected');
-    // Initialize the notification scheduler after database connection
-    scheduleDailyNotifications();
 })
 
 const app = express();
 
-// Trust proxy for Railway deployment
+// Trust proxy — required behind Cloud Run / load balancer
 app.set('trust proxy', 1);
 
 // Rate limiting middleware
@@ -64,8 +61,9 @@ app.use('/api', limiter);
 
 app.use(express.json());
 
-app.listen(3000, () => {
-    console.log(`Server Started at ${3000}`)
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server Started at ${PORT}`)
 })
 
 app.use('/api', router)
