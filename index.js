@@ -61,6 +61,54 @@ app.use('/api', limiter);
 
 app.use(express.json());
 
+// ── Smart share redirect ──────────────────────────────────────────────────────
+// When the app is installed, iOS/Android intercepts this URL and opens the app
+// directly (via Universal Links / App Links) before the browser ever loads.
+// When the app is NOT installed, the browser hits this route and is redirected
+// to the correct store for the user's platform.
+app.get('/share', (req, res) => {
+    const ua = req.headers['user-agent'] || '';
+    if (/android/i.test(ua)) {
+        return res.redirect('https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid');
+    }
+    // iOS / default — update to App Store URL once app is live
+    return res.redirect('https://testflight.apple.com/join/JxNSA5rZ');
+});
+
+// ── iOS Universal Links verification ─────────────────────────────────────────
+// Apple fetches this file to confirm the domain is allowed to open the app.
+app.get('/.well-known/apple-app-site-association', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json({
+        applinks: {
+            apps: [],
+            details: [
+                {
+                    appID: 'CZ654D22GF.com.vlad.wordLadder',
+                    paths: ['/share']
+                }
+            ]
+        }
+    });
+});
+
+// ── Android App Links verification ───────────────────────────────────────────
+// Android fetches this file to confirm the domain is allowed to open the app.
+app.get('/.well-known/assetlinks.json', (req, res) => {
+    res.json([
+        {
+            relation: ['delegate_permission/common.handle_all_urls'],
+            target: {
+                namespace: 'android_app',
+                package_name: 'com.vlad.wordLadderAndroid',
+                sha256_cert_fingerprints: [
+                    'CF:66:92:F8:36:FA:71:88:74:43:CC:7E:0F:3D:6E:22:A9:54:0D:84:3B:E3:AA:6F:F5:EE:7F:10:F4:AA:A8:2B'
+                ]
+            }
+        }
+    ]);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server Started at ${PORT}`)
