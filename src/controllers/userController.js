@@ -1,5 +1,6 @@
 import { WordLadderUsersModel } from "../models/user.js";
 import { LeaderboardOneModel, LeaderboardTwoModel, LeaderboardThreeModel } from "../models/leaderboard.js";
+import { upsertLeaderboardEntry } from "./leaderboardController.js";
 import admin from 'firebase-admin';
 import dotenv from 'dotenv'
 dotenv.config();
@@ -77,7 +78,20 @@ export const getUser = async (userBody) => {
             }
             if(newUser.wordLadder.three && user?.wordLadder?.three?.lastSolved !== diffDays - 1 && user?.wordLadder?.three?.lastSolved !== diffDays){
                 newUser.wordLadder.three.currentStreak = 0;
-            } 
+            }
+
+            // Sync leaderboard for any level whose streak was just reset to 0
+            for (const level of ['one', 'two', 'three']) {
+                const ld = newUser.wordLadder?.[level];
+                if (ld && (ld.totalSolved ?? 0) > 0 && ld.currentStreak === 0 && (user?.wordLadder?.[level]?.currentStreak ?? 0) > 0) {
+                    upsertLeaderboardEntry(user.id, level, {
+                        totalScore:    ld.totalScore    ?? 0,
+                        totalSolved:   ld.totalSolved   ?? 0,
+                        currentStreak: 0,
+                        longestStreak: ld.longestStreak ?? 0,
+                    }).catch(err => console.error(`Leaderboard streak-reset sync failed for level ${level}:`, err));
+                }
+            }
 
             // Get shifted date as YYYY-MM-DD — matches puzzle day boundary (UTC 07:00 = 11 PM PT)
             const currentUTCDate = today.toISOString().split('T')[0];

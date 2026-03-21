@@ -55,7 +55,7 @@ router.post('/updateUser', verifyToken, validateUserUpdate, async (req, res) => 
             const levelsToSync = ['one', 'two', 'three'];
             for (const level of levelsToSync) {
                 const levelData = wl?.[level];
-                if (levelData && levelData.totalSolved > 0) {
+                if (levelData && levelData.currentWordLadder?.completed) {
                     upsertLeaderboardEntry(req.body.id, level, {
                         totalScore:    levelData.totalScore    ?? 0,
                         totalSolved:   levelData.totalSolved   ?? 0,
