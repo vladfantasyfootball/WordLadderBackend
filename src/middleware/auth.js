@@ -37,6 +37,7 @@ export const verifyToken = async (req, res, next) => {
         
         // Add user info to request
         req.user = decodedToken;
+        console.log(`[auth] user id: ${decodedToken.uid}`);
         
         // Verify the user ID matches the request (prevent users from accessing other users' data)
         if (req.body.id && req.body.id !== decodedToken.uid) {

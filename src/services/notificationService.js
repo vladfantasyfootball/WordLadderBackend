@@ -81,8 +81,8 @@ export async function sendDailyPuzzleNotifications() {
             messages.push({
                 to: pushToken,
                 sound: 'default',
-                title: '🎮 New Word Ladder Puzzle!',
-                body: 'A fresh puzzle is waiting for you. Can you solve it?',
+                title: '🪜 New Word Ladders!',
+                body: "Today's puzzles are ready! Can you solve them?",
                 data: { 
                     type: 'daily_puzzle',
                     day: currentDay 
