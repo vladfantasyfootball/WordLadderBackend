@@ -77,6 +77,7 @@ app.get('/share', (req, res) => {
 
 // ── iOS Universal Links verification ─────────────────────────────────────────
 // Apple fetches this file to confirm the domain is allowed to open the app.
+// Serves for both the custom domain and the legacy Cloud Run URL.
 app.get('/.well-known/apple-app-site-association', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.json({
