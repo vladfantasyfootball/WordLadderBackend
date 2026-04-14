@@ -49,6 +49,7 @@ export const userUpdateSchema = Joi.object({
     purchases: Joi.any().optional(), // present in client payload but never written via this endpoint
     notifications: notificationsSchema,
     review: reviewSchema,
+    leaderboardName: Joi.string().max(20).allow(null).optional(),
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key
 }).unknown(false); // Don't allow unknown fields

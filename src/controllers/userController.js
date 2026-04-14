@@ -146,3 +146,26 @@ export const deleteUser = async (userId) => {
         return false;
     }
 }
+
+export async function setLeaderboardName(userId, name) {
+    const trimmed = name.trim();
+    if (!/^[a-zA-Z ]{1,20}$/.test(trimmed)) {
+        return { error: 'Name must be 1–20 characters and contain only letters and spaces.' };
+    }
+
+    // Profanity check (bad-words uses CommonJS default export)
+    const { default: Filter } = await import('bad-words');
+    const filter = new Filter();
+    if (filter.isProfane(trimmed)) {
+        return { error: 'That name contains inappropriate language. Please choose another.' };
+    }
+
+    const updated = await WordLadderUsersModel.findOneAndUpdate(
+        { id: userId },
+        { $set: { leaderboardName: trimmed } },
+        { new: true }
+    ).lean();
+
+    if (!updated) return { error: 'User not found.' };
+    return { user: updated };
+}

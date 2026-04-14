@@ -149,7 +149,7 @@ const getAnagrams = (word) => {
     return path;
   };
 
-  export const addNewPuzzlesToCollection2 = async (puzzleCount = 10) => {
+  export const addNewPuzzlesToCollection2 = async (puzzleCount = 25) => {
     try {
       console.log('Starting puzzle generation...');
       
@@ -189,21 +189,28 @@ const getAnagrams = (word) => {
     let currentId = startingId;
     
     while (puzzles.length < targetCount) {
-          const start = getRandomWord(
-            {minLength: 4, maxLength: 4}
-          );
-          const end = getRandomWord(        
-            {minLength: 4, maxLength: 4}
-          );
+          const wordLength = Math.random() < 0.5 ? 4 : 5;
+          const start = getRandomWord({ minLength: wordLength, maxLength: wordLength });
+          const end = getRandomWord({ minLength: wordLength, maxLength: wordLength });
 
           console.log('trying:' , start, end)
       const key = `${start}-${end}`;
       
-      if (start !== end && !used.has(key) && start.length === end.length) {
+      if (start !== end && !used.has(key) && start.length === end.length
+          && !(start.length === 5 && (start.endsWith('S') || end.endsWith('S')))) {
         const result = findWordLadderWithAnagrams(start, end);
         
         // For level 2, we want puzzles that benefit from anagrams (3-8 steps)
-        if (result.possible && result.steps >= 5 && result.steps <= 10) {
+        // and require at least one anagram move in the shortest solution
+        const pathUsesAnagram = result.path &&
+          result.path.some((word, i) => {
+            if (i === 0) return false;
+            const prev = result.path[i - 1];
+            return prev.length === word.length &&
+              prev.split('').sort().join('') === word.split('').sort().join('') &&
+              prev !== word;
+          });
+        if (result.possible && result.steps >= 5 && result.steps <= 10 && pathUsesAnagram) {
           puzzles.push({
             id: currentId++,
             startingWord: start,

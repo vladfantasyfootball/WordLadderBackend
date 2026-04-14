@@ -1,8 +1,8 @@
 import express from 'express';
-import { getLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
-import { getLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
-import { getLevelThreePuzzle } from '../src/controllers/levelThreePuzzlesController.js';
-import { postUser, getUser, updateUser, deleteUser } from '../src/controllers/userController.js';
+import { getLevelOnePuzzle, getPreviousLevelOnePuzzle } from '../src/controllers/levelOnePuzzlesController.js';
+import { getLevelTwoPuzzle, getPreviousLevelTwoPuzzle } from '../src/controllers/levelTwoPuzzlesController.js';
+import { getLevelThreePuzzle, getPreviousLevelThreePuzzle } from '../src/controllers/levelThreePuzzlesController.js';
+import { postUser, getUser, updateUser, deleteUser, setLeaderboardName } from '../src/controllers/userController.js';
 import { verifyPurchase } from '../src/controllers/purchasesController.js';
 import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
@@ -95,6 +95,24 @@ router.get('/getPuzzles', verifyToken, async (req, res) => {
     }
 })
 
+// Get previous day's puzzles (for "Yesterday's Solution" feature)
+router.get('/getPreviousPuzzles', verifyToken, async (req, res) => {
+    try {
+        const [one, two, three] = await Promise.all([
+            getPreviousLevelOnePuzzle(),
+            getPreviousLevelTwoPuzzle(),
+            getPreviousLevelThreePuzzle(),
+        ]);
+        if (!one) {
+            return res.status(404).send("No previous puzzle available yet");
+        }
+        res.status(200).send({ one, two: two || null, three: three || null });
+    } catch(e) {
+        console.error(e);
+        res.status(500).send("Error retrieving previous puzzles");
+    }
+})
+
 //Delete Account Method
 router.delete('/deleteUser', verifyToken, async (req, res) => {
     try {
@@ -129,6 +147,23 @@ router.post('/trigger-notifications', async (req, res) => {
 // Verify purchase with RevenueCat and unlock premium
 router.post('/purchases/verify', verifyToken, async (req, res) => {
     await verifyPurchase(req, res);
+})
+
+// Set or update a user's leaderboard display name
+router.put('/leaderboardName', verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.uid;
+        const { name } = req.body;
+        if (!name || typeof name !== 'string') {
+            return res.status(400).send('Name is required');
+        }
+        const result = await setLeaderboardName(userId, name);
+        if (result.error) return res.status(400).send(result.error);
+        res.status(200).send(result.user);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error saving leaderboard name');
+    }
 })
 
 // Get leaderboard for a level + category

@@ -47,3 +47,19 @@ export const getLevelOnePuzzle = async () => {
         return null;
     }
 }
+
+export const getPreviousLevelOnePuzzle = async () => {
+    const now = new Date();
+    const today = new Date(now.getTime() - 7 * 60 * 60 * 1000);
+    const releaseDate = new Date(cleanDateConst);
+    const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const releaseDateUTC = Date.UTC(releaseDate.getUTCFullYear(), releaseDate.getUTCMonth(), releaseDate.getUTCDate());
+    const diffDays = Math.floor((todayUTC - releaseDateUTC) / (1000 * 60 * 60 * 24)) + 1;
+    if (diffDays < 2) return null;
+    try {
+        return await LevelOnePuzzlesModel.findOne({ id: diffDays - 1 });
+    } catch (error) {
+        console.error('Error getting previous level one puzzle:', error);
+        return null;
+    }
+}

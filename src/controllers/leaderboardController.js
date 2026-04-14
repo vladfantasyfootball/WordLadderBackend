@@ -1,4 +1,5 @@
 import { LeaderboardOneModel, LeaderboardTwoModel, LeaderboardThreeModel } from '../models/leaderboard.js';
+import { WordLadderUsersModel } from '../models/user.js';
 
 const AVG_SCORE_MIN_SOLVED = 7;
 
@@ -78,5 +79,18 @@ export async function getLeaderboard(level, category, userId) {
         ? Math.round(((total - userRank) / (total - 1)) * 100)
         : 100;
 
-    return { top10, total, userRank, percentileAhead, userScore };
+    // Batch-fetch display names for the top entries
+    const topUserIds = top10.map(e => e.userId);
+    const allIds = userEntry ? [...new Set([...topUserIds, userId])] : topUserIds;
+    const users = await WordLadderUsersModel.find(
+        { id: { $in: allIds } },
+        { id: 1, leaderboardName: 1, _id: 0 }
+    ).lean();
+    const nameMap = {};
+    users.forEach(u => { nameMap[u.id] = u.leaderboardName || null; });
+
+    const top10WithNames = top10.map(e => ({ ...e, displayName: nameMap[e.userId] || 'Anonymous' }));
+    const userDisplayName = nameMap[userId] || null;
+
+    return { top10: top10WithNames, total, userRank, percentileAhead, userScore, userDisplayName };
 }

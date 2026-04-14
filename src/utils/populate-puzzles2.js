@@ -19,7 +19,7 @@ const runOnce = async () => {
     console.log('✅ Database Connected Successfully');
     
     // NOW it's safe to run database operations
-    const result = await addNewPuzzlesToCollection2(10);
+    const result = await addNewPuzzlesToCollection2(25);
     console.log(result.message);
     
   } catch (error) {

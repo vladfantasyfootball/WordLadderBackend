@@ -185,16 +185,14 @@ export function getRandomWord(options = {}) {
     let currentId = startingId;
     
     while (puzzles.length < targetCount) {
-      const start = getRandomWord(
-        {minLength: 4, maxLength: 4}
-      );
-      const end = getRandomWord(        
-        {minLength: 4, maxLength: 4}
-      );
+      const wordLength = Math.random() < 0.5 ? 4 : 5;
+      const start = getRandomWord({ minLength: wordLength, maxLength: wordLength });
+      const end = getRandomWord({ minLength: wordLength, maxLength: wordLength });
       console.log('trying:' , start, end)
       const key = `${start}-${end}`;
       
-      if (start !== end && !used.has(key) && start.length === end.length) {
+      if (start !== end && !used.has(key) && start.length === end.length
+          && !(start.length === 5 && (start.endsWith('S') || end.endsWith('S')))) {
         const result = findWordLadderBidirectional(start, end);
         
         if (result.possible && result.steps >= 4 && result.steps <= 12) {
