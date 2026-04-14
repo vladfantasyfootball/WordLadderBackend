@@ -153,8 +153,7 @@ export async function setLeaderboardName(userId, name) {
         return { error: 'Name must be 1–20 characters and contain only letters and spaces.' };
     }
 
-    // Profanity check (bad-words uses CommonJS default export)
-    const { default: Filter } = await import('bad-words');
+    const { Filter } = await import('bad-words');
     const filter = new Filter();
     if (filter.isProfane(trimmed)) {
         return { error: 'That name contains inappropriate language. Please choose another.' };
