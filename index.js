@@ -131,9 +131,13 @@ app.get('/share', (req, res) => {
   <h1>Word Ladder Puzzle</h1>
   <p>A daily word puzzle game. Climb from one word to another, one letter at a time.</p>
   <a class="btn" href="${storeUrl}">Get the App</a>
-  <p class="note">Redirecting you automatically…</p>
   <script>
-    setTimeout(function() { window.location.href = "${storeUrl}"; }, 1500);
+    // Try to open the app via its custom URL scheme.
+    // If the app is installed but Universal/App Links were bypassed (e.g. in-app browser),
+    // this will open it. If the app is not installed, it fails silently and the
+    // setTimeout below immediately redirects to the correct store.
+    window.location = 'wordladder://share';
+    setTimeout(function() { window.location.replace("${storeUrl}"); }, 300);
   </script>
 </body>
 </html>`);
