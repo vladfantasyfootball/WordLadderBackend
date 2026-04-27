@@ -21,6 +21,9 @@ database.once('connected', () => {
 
 const app = express();
 
+// Serve static files (e.g. OG preview image) from /public
+app.use(express.static('public'));
+
 // Trust proxy — required behind Cloud Run / load balancer
 app.set('trust proxy', 1);
 
@@ -64,15 +67,76 @@ app.use(express.json());
 // ── Smart share redirect ──────────────────────────────────────────────────────
 // When the app is installed, iOS/Android intercepts this URL and opens the app
 // directly (via Universal Links / App Links) before the browser ever loads.
-// When the app is NOT installed, the browser hits this route and is redirected
-// to the correct store for the user's platform.
+// When the app is NOT installed, the browser hits this route. We serve an HTML
+// page with OG meta tags (so messaging apps show a rich preview card) that
+// auto-redirects to the correct store after a short delay.
 app.get('/share', (req, res) => {
     const ua = req.headers['user-agent'] || '';
-    if (/android/i.test(ua)) {
-        return res.redirect('https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid');
+    const isAndroid = /android/i.test(ua);
+    const storeUrl = isAndroid
+        ? 'https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid'
+        : 'https://testflight.apple.com/join/JxNSA5rZ';
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join Word Ladder Puzzle</title>
+
+  <meta property="og:title"       content="Join Word Ladder Puzzle" />
+  <meta property="og:description" content="A daily word puzzle game. Can you climb the ladder?" />
+  <meta property="og:image"       content="https://wordladderpuzzlegame.com/preview.png" />
+  <meta property="og:url"         content="https://wordladderpuzzlegame.com/share" />
+  <meta property="og:type"        content="website" />
+
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Join Word Ladder Puzzle" />
+  <meta name="twitter:description" content="A daily word puzzle game. Can you climb the ladder?" />
+  <meta name="twitter:image"       content="https://wordladderpuzzlegame.com/preview.png" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f0e8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+      color: #111;
     }
-    // iOS / default — update to App Store URL once app is live
-    return res.redirect('https://testflight.apple.com/join/JxNSA5rZ');
+    h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    p  { font-size: 15px; color: #555; max-width: 280px; line-height: 1.5; margin-bottom: 32px; }
+    .btn {
+      display: inline-block;
+      padding: 15px 0;
+      width: 260px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #FFD60A;
+      color: #333;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .note { margin-top: 20px; font-size: 13px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <h1>Word Ladder Puzzle</h1>
+  <p>A daily word puzzle game. Climb from one word to another, one letter at a time.</p>
+  <a class="btn" href="${storeUrl}">Get the App</a>
+  <p class="note">Redirecting you automatically…</p>
+  <script>
+    setTimeout(function() { window.location.href = "${storeUrl}"; }, 1500);
+  </script>
+</body>
+</html>`);
 });
 
 // ── iOS Universal Links verification ─────────────────────────────────────────
