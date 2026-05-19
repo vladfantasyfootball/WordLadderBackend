@@ -96,6 +96,10 @@ export const WordLadderUsersSchema = new mongoose.Schema({
     leaderboardName: {
         type: String,
         default: null,
+    },
+    soundEffectsEnabled: {
+        type: Boolean,
+        default: true,
     }
 });
 

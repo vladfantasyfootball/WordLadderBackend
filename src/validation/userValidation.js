@@ -50,6 +50,7 @@ export const userUpdateSchema = Joi.object({
     notifications: notificationsSchema,
     review: reviewSchema,
     leaderboardName: Joi.string().max(20).allow(null).optional(),
+    soundEffectsEnabled: Joi.boolean().optional(),
     _id: Joi.any().optional(), // MongoDB ID
     __v: Joi.any().optional()  // MongoDB version key
 }).unknown(false); // Don't allow unknown fields
