@@ -94,3 +94,86 @@ export async function getLeaderboard(level, category, userId) {
 
     return { top10: top10WithNames, total, userRank, percentileAhead, userScore, userDisplayName };
 }
+
+// ── Daily leaderboard helpers ─────────────────────────────────────────────────
+
+function getTodaysPuzzleId() {
+    const dateConst = process.env.DATE_CONST;
+    const cleanDateConst = dateConst ? dateConst.replace(/"/g, '') : null;
+    const now = new Date();
+    const today = new Date(now.getTime() - 7 * 60 * 60 * 1000);
+    const releaseDate = new Date(cleanDateConst);
+    const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const releaseDateUTC = Date.UTC(releaseDate.getUTCFullYear(), releaseDate.getUTCMonth(), releaseDate.getUTCDate());
+    return Math.floor((todayUTC - releaseDateUTC) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+/**
+ * Saves today's round score to the leaderboard document.
+ * No-ops if puzzleId doesn't match today's puzzle (stale submit guard).
+ */
+export async function upsertDailyScore(userId, level, puzzleId, score) {
+    const todaysPuzzleId = getTodaysPuzzleId();
+    if (puzzleId !== todaysPuzzleId) return;
+    const model = getModel(level);
+    await model.findOneAndUpdate(
+        { userId },
+        { $set: { dailyScore: { puzzleId, score, completedAt: new Date() } } },
+        { upsert: true }
+    );
+}
+
+/**
+ * Returns top-5 daily scores for today's puzzle and the requesting user's rank.
+ * Pass groupMemberIds to scope to a private group.
+ */
+export async function getDailyLeaderboard(level, userId, groupMemberIds = null) {
+    const model = getModel(level);
+    const todaysPuzzleId = getTodaysPuzzleId();
+
+    const filter = {
+        'dailyScore.puzzleId': todaysPuzzleId,
+        ...(groupMemberIds ? { userId: { $in: groupMemberIds } } : {}),
+    };
+
+    const query = model.find(filter).sort({ 'dailyScore.score': -1 });
+    if (!groupMemberIds) query.limit(5);
+
+    const [top5, total, userEntry] = await Promise.all([
+        query.lean(),
+        model.countDocuments(filter),
+        model.findOne({ userId, 'dailyScore.puzzleId': todaysPuzzleId }).lean(),
+    ]);
+
+    const topUserIds = top5.map(e => e.userId);
+    const allIds = userEntry ? [...new Set([...topUserIds, userId])] : topUserIds;
+    const users = await WordLadderUsersModel.find(
+        { id: { $in: allIds } },
+        { id: 1, leaderboardName: 1, _id: 0 }
+    ).lean();
+    const nameMap = {};
+    users.forEach(u => { nameMap[u.id] = u.leaderboardName || null; });
+
+    const top5WithNames = top5.map(e => ({
+        ...e,
+        [level === 'one' || level === 'two' || level === 'three' ? 'dailyScore' : 'dailyScore']: e.dailyScore,
+        displayName: nameMap[e.userId] || 'Anonymous',
+    }));
+
+    if (!userEntry || total === 0) {
+        return { top10: top5WithNames, total, userRank: null, percentileAhead: null, userScore: null, userDisplayName: nameMap[userId] || null };
+    }
+
+    const userScore = userEntry.dailyScore.score;
+    const countAbove = await model.countDocuments({
+        ...filter,
+        'dailyScore.score': { $gt: userScore },
+    });
+    const userRank = countAbove + 1;
+    const percentileAhead = total > 1
+        ? Math.round(((total - userRank) / (total - 1)) * 100)
+        : 100;
+    const userDisplayName = nameMap[userId] || null;
+
+    return { top10: top5WithNames, total, userRank, percentileAhead, userScore, userDisplayName };
+}

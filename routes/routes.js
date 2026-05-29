@@ -7,7 +7,8 @@ import { verifyPurchase } from '../src/controllers/purchasesController.js';
 import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
 import { sendDailyPuzzleNotifications } from '../src/services/notificationService.js';
-import { upsertLeaderboardEntry, getLeaderboard } from '../src/controllers/leaderboardController.js';
+import { upsertLeaderboardEntry, getLeaderboard, upsertDailyScore, getDailyLeaderboard } from '../src/controllers/leaderboardController.js';
+import { LeaderboardGroupModel } from '../src/models/leaderboardGroup.js';
 import {
     createGroup,
     joinGroup,
@@ -70,6 +71,11 @@ router.post('/updateUser', verifyToken, validateUserUpdate, async (req, res) => 
                         currentStreak: levelData.currentStreak ?? 0,
                         longestStreak: levelData.longestStreak ?? 0,
                     }).catch(err => console.error(`Leaderboard upsert failed for level ${level}:`, err));
+
+                    if (levelData.currentRoundScore != null && levelData.currentWordLadder?.currentPuzzle != null) {
+                        upsertDailyScore(req.body.id, level, levelData.currentWordLadder.currentPuzzle, levelData.currentRoundScore)
+                            .catch(err => console.error(`Daily score upsert failed for level ${level}:`, err));
+                    }
                 }
             }
         }
@@ -80,6 +86,31 @@ router.post('/updateUser', verifyToken, validateUserUpdate, async (req, res) => 
     catch(e) {
         console.log(e);
         res.status(500).send("Error updating user")
+    }
+})
+
+// Get daily leaderboard for today's puzzle
+// Query params: level (one|two|three), groupId (optional)
+router.post('/leaderboard/daily', verifyToken, async (req, res) => {
+    try {
+        const { level, groupId } = req.query;
+        const validLevels = ['one', 'two', 'three'];
+        if (!validLevels.includes(level)) {
+            return res.status(400).send('Invalid level');
+        }
+        let groupMemberIds = null;
+        if (groupId) {
+            const group = await LeaderboardGroupModel.findById(groupId).lean();
+            if (!group || !group.members.includes(req.user.uid)) {
+                return res.status(403).send('Access denied');
+            }
+            groupMemberIds = group.members;
+        }
+        const data = await getDailyLeaderboard(level, req.user.uid, groupMemberIds);
+        res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error retrieving daily leaderboard');
     }
 })
 
