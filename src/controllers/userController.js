@@ -1,6 +1,7 @@
 import { WordLadderUsersModel } from "../models/user.js";
 import { LeaderboardOneModel, LeaderboardTwoModel, LeaderboardThreeModel } from "../models/leaderboard.js";
 import { upsertLeaderboardEntry } from "./leaderboardController.js";
+import { cleanupUserFromGroups } from "./leaderboardGroupController.js";
 import admin from 'firebase-admin';
 import dotenv from 'dotenv'
 dotenv.config();
@@ -122,7 +123,7 @@ export const getUser = async (userBody) => {
 export const updateUser = async (userId, userUpdate) => {
     try{
         // Explicitly exclude fields that must never be changed via this endpoint
-        const { purchases, _id, __v, ...safeUpdate } = userUpdate;
+        const { purchases, _id, __v, leaderboardGroupIds, leaderboardName, ...safeUpdate } = userUpdate;
         const user = await WordLadderUsersModel.findOneAndUpdate({id: userId}, { $set: safeUpdate }, {new: true})
         return user
     } catch (error) {
@@ -138,6 +139,7 @@ export const deleteUser = async (userId) => {
             LeaderboardOneModel.deleteOne({ userId }),
             LeaderboardTwoModel.deleteOne({ userId }),
             LeaderboardThreeModel.deleteOne({ userId }),
+            cleanupUserFromGroups(userId),
         ]);
         await admin.auth().deleteUser(userId);
         return true;

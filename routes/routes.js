@@ -8,6 +8,14 @@ import { verifyToken } from '../src/middleware/auth.js';
 import { validateUserUpdate } from '../src/validation/userValidation.js';
 import { sendDailyPuzzleNotifications } from '../src/services/notificationService.js';
 import { upsertLeaderboardEntry, getLeaderboard } from '../src/controllers/leaderboardController.js';
+import {
+    createGroup,
+    joinGroup,
+    leaveGroup,
+    renameGroup,
+    getUserGroups,
+    getGroupLeaderboard,
+} from '../src/controllers/leaderboardGroupController.js';
 
 export const router = express.Router()
  
@@ -187,5 +195,89 @@ router.post('/leaderboard', verifyToken, async (req, res) => {
     catch(e) {
         console.log(e);
         res.status(500).send("Error retrieving leaderboard");
+    }
+})
+
+// ── Leaderboard Group routes ──────────────────────────────────────────────────
+
+// Get all groups the requesting user belongs to
+router.get('/leaderboard-groups', verifyToken, async (req, res) => {
+    try {
+        const groups = await getUserGroups(req.user.uid);
+        res.status(200).json(groups);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error retrieving groups');
+    }
+})
+
+// Create a new group
+router.post('/leaderboard-groups', verifyToken, async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).send('Group name is required');
+        const result = await createGroup(req.user.uid, name);
+        if (result.error) return res.status(400).send(result.error);
+        res.status(201).json(result.group);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error creating group');
+    }
+})
+
+// Join a group via invite link
+router.post('/leaderboard-groups/:id/join', verifyToken, async (req, res) => {
+    try {
+        const result = await joinGroup(req.user.uid, req.params.id);
+        if (result.error) return res.status(400).send(result.error);
+        res.status(200).json(result.group);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error joining group');
+    }
+})
+
+// Leave a group
+router.post('/leaderboard-groups/:id/leave', verifyToken, async (req, res) => {
+    try {
+        const result = await leaveGroup(req.user.uid, req.params.id);
+        if (result.error) return res.status(400).send(result.error);
+        res.status(200).json({ success: true });
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error leaving group');
+    }
+})
+
+// Rename a group (creator only)
+router.put('/leaderboard-groups/:id/rename', verifyToken, async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).send('Name is required');
+        const result = await renameGroup(req.user.uid, req.params.id, name);
+        if (result.error) return res.status(400).send(result.error);
+        res.status(200).json(result.group);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error renaming group');
+    }
+})
+
+// Get group leaderboard
+// Query params: groupId, level (one|two|three), category
+router.post('/leaderboard/group', verifyToken, async (req, res) => {
+    try {
+        const { groupId, level, category } = req.query;
+        const validLevels = ['one', 'two', 'three'];
+        const validCategories = ['totalScore', 'averageScore', 'currentStreak', 'longestStreak', 'totalSolved'];
+        if (!groupId || !validLevels.includes(level) || !validCategories.includes(category)) {
+            return res.status(400).send('Invalid parameters');
+        }
+        const data = await getGroupLeaderboard(groupId, level, category, req.user.uid);
+        if (!data) return res.status(404).send('Group not found or access denied');
+        res.status(200).json(data);
+    } catch (e) {
+        console.error(e);
+        res.status(500).send('Error retrieving group leaderboard');
     }
 })

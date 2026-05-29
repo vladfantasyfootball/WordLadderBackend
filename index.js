@@ -75,7 +75,7 @@ app.get('/share', (req, res) => {
     const isAndroid = /android/i.test(ua);
     const storeUrl = isAndroid
         ? 'https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid'
-        : 'https://testflight.apple.com/join/JxNSA5rZ';
+        : 'https://apps.apple.com/us/app/word-ladder-puzzle/id6759207300';
 
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!DOCTYPE html>
@@ -154,13 +154,80 @@ app.get('/.well-known/apple-app-site-association', (req, res) => {
             details: [
                 {
                     appID: 'CZ654D22GF.com.vlad.wordLadder',
-                    paths: ['/share']
+                    paths: ['/share', '/join/*']
                 }
             ]
         }
     });
 });
+// ── Leaderboard group invite redirect ──────────────────────────────────────────────
+// When the app is installed, iOS intercepts this Universal Link before the
+// browser loads and opens the app directly with the group ID in the URL.
+// When the app is not installed, the browser lands here and we redirect to
+// the App Store so the user can install, then tap the link again to join.
+app.get('/join/:groupId', (req, res) => {
+    const { groupId } = req.params;
+    const ua = req.headers['user-agent'] || '';
+    const isAndroid = /android/i.test(ua);
+    const storeUrl = isAndroid
+        ? 'https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid'
+        : 'https://apps.apple.com/us/app/word-ladder-puzzle/id6759207300';
 
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join Leaderboard Group – Word Ladder</title>
+  <meta property="og:title"       content="Join my Word Ladder leaderboard!" />
+  <meta property="og:description" content="You've been invited to a private Word Ladder leaderboard group. Download the app to compete!" />
+  <meta property="og:image"       content="https://wordladderpuzzlegame.com/preview.png" />
+  <meta property="og:url"         content="https://wordladderpuzzlegame.com/join/${groupId}" />
+  <meta property="og:type"        content="website" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f0e8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+      color: #111;
+    }
+    h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    p  { font-size: 15px; color: #555; max-width: 300px; line-height: 1.5; margin-bottom: 32px; }
+    .btn {
+      display: inline-block;
+      padding: 15px 0;
+      width: 260px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      background: #FFD60A;
+      color: #333;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .note { margin-top: 20px; font-size: 13px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <h1>You've been invited! 🏆</h1>
+  <p>Open the Word Ladder app to join this leaderboard group and compete with friends.</p>
+  <a class="btn" href="${storeUrl}">Get the App</a>
+  <p class="note">Already installed? Go back and tap the link again to join.</p>
+  <script>
+    window.location = 'wordladder://join/${groupId}';
+    setTimeout(function() { window.location.replace("${storeUrl}"); }, 400);
+  </script>
+</body>
+</html>`);
+});
 // ── Android App Links verification ───────────────────────────────────────────
 // Android fetches this file to confirm the domain is allowed to open the app.
 app.get('/.well-known/assetlinks.json', (req, res) => {

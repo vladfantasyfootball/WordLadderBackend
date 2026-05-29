@@ -100,7 +100,11 @@ export const WordLadderUsersSchema = new mongoose.Schema({
     soundEffectsEnabled: {
         type: Boolean,
         default: true,
-    }
+    },
+    leaderboardGroupIds: {
+        type: [String],
+        default: [],
+    },
 });
 
 export const WordLadderUsersModel = mongoose.model("WordLadderUsers", WordLadderUsersSchema, "WordLadderUsers");
