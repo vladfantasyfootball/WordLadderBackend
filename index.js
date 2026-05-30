@@ -201,6 +201,11 @@ app.get('/share', (req, res) => {
     const storeUrl = isAndroid
         ? 'https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid'
         : 'https://apps.apple.com/us/app/word-ladder-puzzle/id6759207300';
+    const storeName = isAndroid ? 'Get it on Google Play' : 'Download on the App Store';
+
+    // intent:// URI — Chrome on Android opens the app directly if installed,
+    // or falls back to browser_fallback_url if not. No setTimeout race needed.
+    const androidDeepLink = `intent://share#Intent;scheme=wordladder;package=com.vlad.wordLadderAndroid;S.browser_fallback_url=${encodeURIComponent(storeUrl)};end`;
 
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!DOCTYPE html>
@@ -208,61 +213,69 @@ app.get('/share', (req, res) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Join Word Ladder Puzzle</title>
+  <title>Word Ladder Puzzle</title>
 
-  <meta property="og:title"       content="Join Word Ladder Puzzle" />
-  <meta property="og:description" content="A daily word puzzle game. Can you climb the ladder?" />
+  <meta property="og:title"       content="Word Ladder Puzzle" />
+  <meta property="og:description" content="A free daily word puzzle game. Can you climb the ladder?" />
   <meta property="og:image"       content="https://wordladderpuzzlegame.com/preview.png" />
   <meta property="og:url"         content="https://wordladderpuzzlegame.com/share" />
   <meta property="og:type"        content="website" />
 
   <meta name="twitter:card"        content="summary_large_image" />
-  <meta name="twitter:title"       content="Join Word Ladder Puzzle" />
-  <meta name="twitter:description" content="A daily word puzzle game. Can you climb the ladder?" />
+  <meta name="twitter:title"       content="Word Ladder Puzzle" />
+  <meta name="twitter:description" content="A free daily word puzzle game. Can you climb the ladder?" />
   <meta name="twitter:image"       content="https://wordladderpuzzlegame.com/preview.png" />
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f0e8;
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
+      padding: 32px 24px;
       text-align: center;
-      color: #111;
+      color: #fff;
     }
-    h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
-    p  { font-size: 15px; color: #555; max-width: 280px; line-height: 1.5; margin-bottom: 32px; }
+    .icon { font-size: 64px; margin-bottom: 16px; }
+    h1 { font-size: 32px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 10px; }
+    .tagline { font-size: 16px; color: #FFD60A; font-weight: 600; margin-bottom: 16px; }
+    .desc { font-size: 15px; color: #b0b8d1; max-width: 300px; line-height: 1.7; margin-bottom: 36px; }
     .btn {
       display: inline-block;
-      padding: 15px 0;
-      width: 260px;
+      padding: 16px 0;
+      width: 280px;
       border-radius: 50px;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       text-decoration: none;
       background: #FFD60A;
-      color: #333;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      color: #1a1a2e;
+      box-shadow: 0 6px 24px rgba(255,214,10,0.35);
     }
-    .note { margin-top: 20px; font-size: 13px; color: #aaa; }
+    .note { margin-top: 18px; font-size: 13px; color: #6b7a99; }
   </style>
 </head>
 <body>
+  <div class="icon">🪜</div>
   <h1>Word Ladder Puzzle</h1>
-  <p>A daily word puzzle game. Climb from one word to another, one letter at a time.</p>
-  <a class="btn" href="${storeUrl}">Get the App</a>
+  <p class="tagline">A new puzzle every day</p>
+  <p class="desc">Climb from one word to another, one letter at a time. Free daily puzzles, streaks, and leaderboards.</p>
+  <a class="btn" href="${storeUrl}">${storeName}</a>
+  <p class="note">Already installed? Open the app directly.</p>
   <script>
-    // Try to open the app via its custom URL scheme.
-    // If the app is installed but Universal/App Links were bypassed (e.g. in-app browser),
-    // this will open it. If the app is not installed, it fails silently and the
-    // setTimeout below immediately redirects to the correct store.
-    window.location = 'wordladder://share';
-    setTimeout(function() { window.location.replace("${storeUrl}"); }, 300);
+    var isAndroid = /android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      // intent:// opens the app if installed, falls back to Play Store automatically
+      window.location = '${androidDeepLink}';
+    } else {
+      // iOS: try custom scheme, fall back to App Store after delay
+      window.location = 'wordladder://share';
+      setTimeout(function() { window.location.replace('${storeUrl}'); }, 1500);
+    }
   </script>
 </body>
 </html>`);
@@ -297,6 +310,9 @@ app.get('/join/:groupId', (req, res) => {
     const storeUrl = isAndroid
         ? 'https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid'
         : 'https://apps.apple.com/us/app/word-ladder-puzzle/id6759207300';
+    const storeName = isAndroid ? 'Get it on Google Play' : 'Download on the App Store';
+
+    const androidDeepLink = `intent://join/${groupId}#Intent;scheme=wordladder;package=com.vlad.wordLadderAndroid;S.browser_fallback_url=${encodeURIComponent(storeUrl)};end`;
 
     res.setHeader('Content-Type', 'text/html');
     res.send(`<!DOCTYPE html>
@@ -306,7 +322,7 @@ app.get('/join/:groupId', (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Join Leaderboard Group – Word Ladder</title>
   <meta property="og:title"       content="Join my Word Ladder leaderboard!" />
-  <meta property="og:description" content="You've been invited to a private Word Ladder leaderboard group. Download the app to compete!" />
+  <meta property="og:description" content="You've been invited to a private Word Ladder leaderboard group. Compete with friends!" />
   <meta property="og:image"       content="https://wordladderpuzzlegame.com/preview.png" />
   <meta property="og:url"         content="https://wordladderpuzzlegame.com/join/${groupId}" />
   <meta property="og:type"        content="website" />
@@ -314,41 +330,50 @@ app.get('/join/:groupId', (req, res) => {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f5f0e8;
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
+      padding: 32px 24px;
       text-align: center;
-      color: #111;
+      color: #fff;
     }
-    h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
-    p  { font-size: 15px; color: #555; max-width: 300px; line-height: 1.5; margin-bottom: 32px; }
+    .icon { font-size: 64px; margin-bottom: 16px; }
+    h1 { font-size: 32px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 10px; }
+    .tagline { font-size: 16px; color: #FFD60A; font-weight: 600; margin-bottom: 16px; }
+    .desc { font-size: 15px; color: #b0b8d1; max-width: 300px; line-height: 1.7; margin-bottom: 36px; }
     .btn {
       display: inline-block;
-      padding: 15px 0;
-      width: 260px;
+      padding: 16px 0;
+      width: 280px;
       border-radius: 50px;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       text-decoration: none;
       background: #FFD60A;
-      color: #333;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      color: #1a1a2e;
+      box-shadow: 0 6px 24px rgba(255,214,10,0.35);
     }
-    .note { margin-top: 20px; font-size: 13px; color: #aaa; }
+    .note { margin-top: 18px; font-size: 13px; color: #6b7a99; }
   </style>
 </head>
 <body>
-  <h1>You've been invited! 🏆</h1>
-  <p>Open the Word Ladder app to join this leaderboard group and compete with friends.</p>
-  <a class="btn" href="${storeUrl}">Get the App</a>
-  <p class="note">Already installed? Go back and tap the link again to join.</p>
+  <div class="icon">🏆</div>
+  <h1>You're invited!</h1>
+  <p class="tagline">Join a Word Ladder leaderboard group</p>
+  <p class="desc">Compete with friends on daily puzzles and see how you rank. Open the app to accept the invite.</p>
+  <a class="btn" href="${storeUrl}">${storeName}</a>
+  <p class="note">Already installed? The app should open automatically.</p>
   <script>
-    window.location = 'wordladder://join/${groupId}';
-    setTimeout(function() { window.location.replace("${storeUrl}"); }, 400);
+    var isAndroid = /android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      window.location = '${androidDeepLink}';
+    } else {
+      window.location = 'wordladder://join/${groupId}';
+      setTimeout(function() { window.location.replace('${storeUrl}'); }, 1500);
+    }
   </script>
 </body>
 </html>`);
