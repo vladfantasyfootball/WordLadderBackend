@@ -64,6 +64,131 @@ app.use('/api', limiter);
 
 app.use(express.json());
 
+// ── Landing page ─────────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+    const ua = req.headers['user-agent'] || '';
+    const isAndroid = /android/i.test(ua);
+    const storeUrl = isAndroid
+        ? 'https://play.google.com/store/apps/details?id=com.vlad.wordLadderAndroid'
+        : 'https://apps.apple.com/us/app/word-ladder-puzzle/id6759207300';
+    const storeName = isAndroid ? 'Get it on Google Play' : 'Download on the App Store';
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word Ladder Puzzle</title>
+
+  <meta name="description" content="A free daily word puzzle game. Transform one word into another, one step at a time. Play Word Ladder Puzzle on iOS and Android." />
+
+  <meta property="og:title"       content="Word Ladder Puzzle" />
+  <meta property="og:description" content="A free daily word puzzle game. Transform one word into another, one step at a time." />
+  <meta property="og:image"       content="https://wordladderpuzzlegame.com/preview.png" />
+  <meta property="og:url"         content="https://wordladderpuzzlegame.com" />
+  <meta property="og:type"        content="website" />
+
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="Word Ladder Puzzle" />
+  <meta name="twitter:description" content="A free daily word puzzle game. Transform one word into another, one step at a time." />
+  <meta name="twitter:image"       content="https://wordladderpuzzlegame.com/preview.png" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      text-align: center;
+      color: #fff;
+    }
+    .icon { font-size: 72px; margin-bottom: 16px; }
+    h1 {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .tagline {
+      font-size: 18px;
+      color: #FFD60A;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .desc {
+      font-size: 15px;
+      color: #b0b8d1;
+      max-width: 320px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 40px;
+      max-width: 300px;
+      width: 100%;
+    }
+    .feature {
+      background: rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #dde3f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+    .feature span { font-size: 20px; }
+    .btn {
+      display: inline-block;
+      padding: 16px 0;
+      width: 280px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 800;
+      text-decoration: none;
+      background: #FFD60A;
+      color: #1a1a2e;
+      box-shadow: 0 6px 24px rgba(255,214,10,0.35);
+      margin-bottom: 16px;
+    }
+    .secondary {
+      font-size: 13px;
+      color: #6b7a99;
+      margin-top: 8px;
+    }
+    .secondary a { color: #6b7a99; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="icon">🪜</div>
+  <h1>Word Ladder Puzzle</h1>
+  <p class="tagline">A new puzzle every day</p>
+  <p class="desc">
+    Transform one word into another, one letter at a time.
+    Every step must be a valid word — how efficiently can you climb the ladder?
+  </p>
+  <div class="features">
+    <div class="feature"><span>📅</span> Free daily puzzle for everyone</div>
+    <div class="feature"><span>🏆</span> Global &amp; friend leaderboards</div>
+    <div class="feature"><span>🔥</span> Streak tracking &amp; rank progression</div>
+    <div class="feature"><span>⚡</span> Three difficulty levels</div>
+  </div>
+  <a class="btn" href="${storeUrl}">${storeName}</a>
+  <p class="secondary">Available free on iOS &amp; Android</p>
+</body>
+</html>`);
+});
+
 // ── Smart share redirect ──────────────────────────────────────────────────────
 // When the app is installed, iOS/Android intercepts this URL and opens the app
 // directly (via Universal Links / App Links) before the browser ever loads.
