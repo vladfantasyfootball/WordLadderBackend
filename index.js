@@ -264,17 +264,14 @@ app.get('/share', (req, res) => {
   <h1>Word Ladder Puzzle</h1>
   <p class="tagline">A new puzzle every day</p>
   <p class="desc">Climb from one word to another, one letter at a time. Free daily puzzles, streaks, and leaderboards.</p>
-  <a class="btn" href="${storeUrl}">${storeName}</a>
-  <p class="note">Already installed? Open the app directly.</p>
+  <a class="btn" id="openBtn" href="${storeUrl}">${storeName}</a>
+  <p class="note">Already have the app? <a id="appLink" style="color:#FFD60A;" href="#">Open it here</a></p>
   <script>
     var isAndroid = /android/i.test(navigator.userAgent);
     if (isAndroid) {
-      // intent:// opens the app if installed, falls back to Play Store automatically
-      window.location = '${androidDeepLink}';
+      document.getElementById('appLink').href = '${androidDeepLink}';
     } else {
-      // iOS: try custom scheme, fall back to App Store after delay
-      window.location = 'wordladder://share';
-      setTimeout(function() { window.location.replace('${storeUrl}'); }, 1500);
+      document.getElementById('appLink').href = 'wordladder://share';
     }
   </script>
 </body>
@@ -363,16 +360,13 @@ app.get('/join/:groupId', (req, res) => {
   <div class="icon">🏆</div>
   <h1>You're invited!</h1>
   <p class="tagline">Join a Word Ladder leaderboard group</p>
-  <p class="desc">Compete with friends on daily puzzles and see how you rank. Open the app to accept the invite.</p>
-  <a class="btn" href="${storeUrl}">${storeName}</a>
-  <p class="note">Already installed? The app should open automatically.</p>
+  <p class="desc">Compete with friends on daily puzzles and see how you rank. Tap below to accept the invite.</p>
+  <a class="btn" id="openBtn" href="wordladder://join/${groupId}">Join Leaderboard</a>
+  <p class="note">Don't have the app? <a id="storeLink" style="color:#FFD60A;" href="${storeUrl}">${storeName}</a></p>
   <script>
     var isAndroid = /android/i.test(navigator.userAgent);
     if (isAndroid) {
-      window.location = '${androidDeepLink}';
-    } else {
-      window.location = 'wordladder://join/${groupId}';
-      setTimeout(function() { window.location.replace('${storeUrl}'); }, 1500);
+      document.getElementById('openBtn').href = '${androidDeepLink}';
     }
   </script>
 </body>
@@ -388,6 +382,7 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
                 namespace: 'android_app',
                 package_name: 'com.vlad.wordLadderAndroid',
                 sha256_cert_fingerprints: [
+                    '09:4F:9B:35:F4:85:94:C6:EC:C5:03:81:08:89:9C:3C:9D:06:F0:97:64:15:C6:B1:0E:CF:26:EF:58:22:E1:A9',
                     'CF:66:92:F8:36:FA:71:88:74:43:CC:7E:0F:3D:6E:22:A9:54:0D:84:3B:E3:AA:6F:F5:EE:7F:10:F4:AA:A8:2B'
                 ]
             }
