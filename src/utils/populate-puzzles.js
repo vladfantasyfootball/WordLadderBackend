@@ -3,6 +3,10 @@ dotenv.config();
 import mongoose from 'mongoose';
 import { addNewPuzzlesToCollection } from './populateValidEnglishWordsCollection.js';
 
+// Usage: node populate-puzzles.js [count]
+// Default: generates 100 puzzles. Pass a number as the first argument to generate more/fewer.
+const puzzleCount = parseInt(process.argv[2]) || 50;
+
 const runOnce = async () => {
   try {
     const mongoString = process.env.DATABASE_URL;
@@ -17,9 +21,10 @@ const runOnce = async () => {
     }
     
     console.log('✅ Database Connected Successfully');
+    console.log(`Generating ${puzzleCount} Level 1 puzzles...\n`);
     
     // NOW it's safe to run database operations
-    const result = await addNewPuzzlesToCollection(25);
+    const result = await addNewPuzzlesToCollection(puzzleCount);
     console.log(result.message);
     
   } catch (error) {

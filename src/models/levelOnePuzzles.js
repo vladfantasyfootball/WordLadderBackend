@@ -19,4 +19,7 @@ export const LevelOnePuzzlesSchema = new mongoose.Schema({
     }
 });
 
+// Every puzzle fetch is findOne({ id: diffDays }) — this index makes it O(log n)
+LevelOnePuzzlesSchema.index({ id: 1 }, { unique: true });
+
 export const LevelOnePuzzlesModel = mongoose.model("LevelOnePuzzles", LevelOnePuzzlesSchema, "LevelOnePuzzles");

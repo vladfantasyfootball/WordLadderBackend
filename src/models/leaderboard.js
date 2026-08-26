@@ -47,6 +47,9 @@ leaderboardSchema.index({ currentStreak: -1 });
 leaderboardSchema.index({ longestStreak: -1 });
 leaderboardSchema.index({ totalSolved: -1 });
 leaderboardSchema.index({ 'dailyScore.puzzleId': 1, 'dailyScore.score': -1 });
+// Group daily leaderboard filters by { userId: { $in: memberIds }, 'dailyScore.puzzleId': today }
+// This compound index lets Mongo satisfy both predicates without a collection scan
+leaderboardSchema.index({ userId: 1, 'dailyScore.puzzleId': 1 });
 
 export const LeaderboardOneModel = mongoose.model("LeaderboardOne", leaderboardSchema, "LeaderboardOne");
 export const LeaderboardTwoModel = mongoose.model("LeaderboardTwo", leaderboardSchema, "LeaderboardTwo");

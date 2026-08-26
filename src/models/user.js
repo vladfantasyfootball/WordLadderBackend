@@ -107,4 +107,9 @@ export const WordLadderUsersSchema = new mongoose.Schema({
     },
 });
 
+// Primary lookup key — every read/write goes through this field
+WordLadderUsersSchema.index({ id: 1 }, { unique: true });
+// Batch display-name lookups from leaderboard controllers use { id: { $in: [...] } }
+// — covered by the index above.
+
 export const WordLadderUsersModel = mongoose.model("WordLadderUsers", WordLadderUsersSchema, "WordLadderUsers");

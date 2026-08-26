@@ -5,7 +5,7 @@ import { addNewPuzzlesToCollection3 } from './populate-level3-puzzles.js';
 
 // Usage: node populate-puzzles3.js [count]
 // Default: generates 10 puzzles. Pass a number as the first argument to generate more.
-const puzzleCount = parseInt(process.argv[2]) || 10;
+const puzzleCount = parseInt(process.argv[2]) || 50;
 
 const runOnce = async () => {
   try {
