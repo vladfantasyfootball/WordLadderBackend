@@ -1,6 +1,7 @@
 import { LevelTwoPuzzlesModel } from '../models/levelTwoPuzzles.js';
 import {englishWords} from '../controllers/conciseEnglishWords.js';
 import { getRandomWord } from './populateValidEnglishWordsCollection.js';
+import { commonWords } from '../controllers/commonWords.js';
 
 // Helper function to get all valid anagrams of a word
 const getAnagrams = (word) => {
@@ -187,21 +188,22 @@ const getAnagrams = (word) => {
     const puzzles = [];
     const used = new Set();
     let currentId = startingId;
+    let attempts = 0;
     
     while (puzzles.length < targetCount) {
-          const wordLength = Math.random() < 0.5 ? 4 : 5;
-          const start = getRandomWord({ minLength: wordLength, maxLength: wordLength });
-          const end = getRandomWord({ minLength: wordLength, maxLength: wordLength });
-
-          console.log('trying:' , start, end)
+      attempts++;
+      const wordLength = Math.random() < 0.5 ? 4 : 5;
+      const start = getRandomWord({ minLength: wordLength, maxLength: wordLength });
+      const end = getRandomWord({ minLength: wordLength, maxLength: wordLength });
       const key = `${start}-${end}`;
+
+      console.log(`[${puzzles.length + 1}/${targetCount}] Attempt ${attempts}: trying ${start} → ${end}`);
       
       if (start !== end && !used.has(key) && start.length === end.length
           && !(start.length === 5 && (start.endsWith('S') || end.endsWith('S')))) {
         const result = findWordLadderWithAnagrams(start, end);
         
-        // For level 2, we want puzzles that benefit from anagrams (3-8 steps)
-        // and require at least one anagram move in the shortest solution
+        // requires at least one anagram move in the shortest solution
         const pathUsesAnagram = result.path &&
           result.path.some((word, i) => {
             if (i === 0) return false;
@@ -210,7 +212,8 @@ const getAnagrams = (word) => {
               prev.split('').sort().join('') === word.split('').sort().join('') &&
               prev !== word;
           });
-        if (result.possible && result.steps >= 5 && result.steps <= 10 && pathUsesAnagram) {
+        const intermediatesAreCommon = result.path && result.path.slice(1, -1).every(w => commonWords.has(w));
+        if (result.possible && result.steps >= 4 && result.steps <= 8 && pathUsesAnagram && intermediatesAreCommon) {
           puzzles.push({
             id: currentId++,
             startingWord: start,
@@ -219,10 +222,22 @@ const getAnagrams = (word) => {
           });
           used.add(key);
           used.add(`${end}-${start}`);
+          console.log(`  ✅ Accepted! Steps: ${result.steps}, path: ${result.path.join(' → ')}`);
+        } else if (!result.possible) {
+          console.log(`  ✗ Rejected — no path found`);
+        } else if (result.steps < 4 || result.steps > 8) {
+          console.log(`  ✗ Rejected — steps out of range (${result.steps})`);
+        } else if (!pathUsesAnagram) {
+          console.log(`  ✗ Rejected — no anagram move in solution`);
+        } else {
+          console.log(`  ✗ Rejected — uncommon intermediate: ${result.path.slice(1, -1).find(w => !commonWords.has(w))}`);
         }
+      } else {
+        console.log(`  ✗ Skipped — duplicate or invalid pair`);
       }
     }
-    
+
+    console.log(`\nGenerated ${puzzles.length} puzzles in ${attempts} attempts`);
     return puzzles;
   };
   

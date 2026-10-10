@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 
 const mongoString = process.env.DATABASE_URL;
-mongoose.connect(mongoString, { maxPoolSize: 5 });
+mongoose.connect(mongoString, { useNewUrlParser: true, useUnifiedTopology: true });
 const database = mongoose.connection;
 
 database.on('error', (error) => {

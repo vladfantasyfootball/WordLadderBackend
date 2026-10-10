@@ -137,7 +137,7 @@ export async function getDailyLeaderboard(level, userId, groupMemberIds = null) 
     };
 
     const query = model.find(filter).sort({ 'dailyScore.score': -1 });
-    if (!groupMemberIds) query.limit(5);
+    // no limit — daily resets every day so the list stays small
 
     const [top5, total, userEntry] = await Promise.all([
         query.lean(),

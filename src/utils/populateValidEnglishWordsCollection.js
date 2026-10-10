@@ -1,5 +1,6 @@
 import { LevelOnePuzzlesModel } from '../models/levelOnePuzzles.js';
 import {englishWords} from '../controllers/conciseEnglishWords.js';
+import { commonWords } from '../controllers/commonWords.js';
 
 const findWordLadderBidirectional = (startWord, endWord, maxDepth = 10) => {
     startWord = startWord.toUpperCase().trim();
@@ -183,19 +184,23 @@ export function getRandomWord(options = {}) {
     const puzzles = [];
     const used = new Set();
     let currentId = startingId;
+    let attempts = 0;
     
     while (puzzles.length < targetCount) {
+      attempts++;
       const wordLength = Math.random() < 0.5 ? 4 : 5;
       const start = getRandomWord({ minLength: wordLength, maxLength: wordLength });
       const end = getRandomWord({ minLength: wordLength, maxLength: wordLength });
-      console.log('trying:' , start, end)
       const key = `${start}-${end}`;
+
+      console.log(`[${puzzles.length + 1}/${targetCount}] Attempt ${attempts}: trying ${start} → ${end}`);
       
       if (start !== end && !used.has(key) && start.length === end.length
           && !(start.length === 5 && (start.endsWith('S') || end.endsWith('S')))) {
         const result = findWordLadderBidirectional(start, end);
         
-        if (result.possible && result.steps >= 4 && result.steps <= 12) {
+        const intermediatesAreCommon = result.path && result.path.slice(1, -1).every(w => commonWords.has(w));
+        if (result.possible && result.steps >= 4 && result.steps <= 8 && intermediatesAreCommon) {
           puzzles.push({
             id: currentId++,
             startingWord: start,
@@ -204,9 +209,19 @@ export function getRandomWord(options = {}) {
           });
           used.add(key);
           used.add(`${end}-${start}`);
+          console.log(`  ✅ Accepted! Steps: ${result.steps}, path: ${result.path.join(' → ')}`);
+        } else if (!result.possible) {
+          console.log(`  ✗ Rejected — no path found`);
+        } else if (result.steps < 4 || result.steps > 8) {
+          console.log(`  ✗ Rejected — steps out of range (${result.steps})`);
+        } else {
+          console.log(`  ✗ Rejected — uncommon intermediate: ${result.path.slice(1, -1).find(w => !commonWords.has(w))}`);
         }
+      } else {
+        console.log(`  ✗ Skipped — duplicate or invalid pair`);
       }
     }
-    
+
+    console.log(`\nGenerated ${puzzles.length} puzzles in ${attempts} attempts`);
     return puzzles;
    };

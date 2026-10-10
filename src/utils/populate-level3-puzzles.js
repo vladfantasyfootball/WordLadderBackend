@@ -1,6 +1,7 @@
 import { LevelThreePuzzlesModel } from '../models/levelThreePuzzles.js';
 import { englishWords } from '../controllers/conciseEnglishWords.js';
 import { getRandomWord } from './populateValidEnglishWordsCollection.js';
+import { commonWords } from '../controllers/commonWords.js';
 
 const MIN_WORD_LENGTH = 3;
 const MAX_WORD_LENGTH = 6;
@@ -186,12 +187,14 @@ const generateRandomPuzzlesLevel3 = (targetCount = 10, startingId = 1) => {
 
         const result = findWordLadderLevel3(start, end);
 
-        if (result.possible && result.steps >= 5) {
+        if (result.possible && result.steps >= 4 && result.steps <= 8) {
             const fourLetterCount = result.path.filter(w => w.length === 4).length;
             const fiveLetterCount = result.path.filter(w => w.length === 5).length;
             const hasEnoughVariety = fourLetterCount >= 2 && fiveLetterCount >= 2;
+            // only enforce common-word check on 4-5 letter intermediates; 6 letter words are rarer in the common list
+            const intermediatesAreCommon = result.path.slice(1, -1).every(w => w.length >= 6 || commonWords.has(w));
 
-            if (hasEnoughVariety) {
+            if (hasEnoughVariety && intermediatesAreCommon) {
                 puzzles.push({
                     id: currentId++,
                     startingWord: start,
@@ -202,10 +205,13 @@ const generateRandomPuzzlesLevel3 = (targetCount = 10, startingId = 1) => {
                 used.add(`${end}-${start}`);
                 console.log(`  ✅ Accepted! Steps: ${result.steps}, 4-letter: ${fourLetterCount}, 5-letter: ${fiveLetterCount}, path: ${result.path.join(' → ')}`);
             } else {
-                console.log(`  ✗ Rejected — not enough word variety (4-letter: ${fourLetterCount}, 5-letter: ${fiveLetterCount})`);
+                const reason = !hasEnoughVariety
+                    ? `not enough word variety (4-letter: ${fourLetterCount}, 5-letter: ${fiveLetterCount})`
+                    : `uncommon intermediate: ${result.path.slice(1, -1).find(w => !commonWords.has(w))}`;
+                console.log(`  ✗ Rejected — ${reason}`);
             }
         } else if (result.possible) {
-            console.log(`  ✗ Rejected — too short (${result.steps} steps)`);
+            console.log(`  ✗ Rejected — steps out of range (${result.steps})`);
         } else {
             console.log(`  ✗ Rejected — no path found`);
         }
