@@ -13,6 +13,14 @@ export const WordLadderUsersSchema = new mongoose.Schema({
             dateWatched: null
         }
     },
+    morphAd: {
+        type: Object,
+        required: false,
+        default: {
+            adWatched: false,
+            dateWatched: null
+        }
+    },
     wordLadder: {
         type: Object,
         required: true,
